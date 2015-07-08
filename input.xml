@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GasStation numOfPumps="3" pricePerLiter="7.82">
+	<MainFuelPool maxCapacity="500" currentCapacity="250" />
+	<CleaningService numOfTeams="3" price="40" secondsPerAutoClean="3" />
+	<Cars>
+		<Car id="111" wantCleaning="true">
+			<WantsFuel numOfLiters="36" pumpNum="1" />
+		</Car>
+		<Car id="222">
+			<WantsFuel numOfLiters="33" pumpNum="2" />
+		</Car>
+		<Car id="333" wantCleaning="true" />
+		<Car id="444" wantCleaning="true">
+			<WantsFuel numOfLiters="38" pumpNum="3" />
+		</Car>
+                <Car id="555" wantCleaning="true">
+			<WantsFuel numOfLiters="25" pumpNum="2" />
+		</Car>
+		<Car id="666">
+			<WantsFuel numOfLiters="34" pumpNum="1" />
+		</Car>
+		<Car id="777" wantCleaning="true">
+                        <WantsFuel numOfLiters="29" pumpNum="2" />
+                </Car>
+		<Car id="888" wantCleaning="true">
+			<WantsFuel numOfLiters="35" pumpNum="3" />
+		</Car>   
+	</Cars>
+</GasStation>

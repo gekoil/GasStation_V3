@@ -1,0 +1,60 @@
+
+.root {
+	-fx-background-color: green;
+}
+
+.label {
+	-fx-font-size: 16px;
+	-fx-text-fill: #ffffff;
+	-fx-font-weight: bold;
+	-fx-text-alignment: CENTER;
+}
+
+.button {
+	-fx-background-color: linear-gradient(#2A5058, #61a2b1);
+	-fx-text-size: 13px;
+	-fx-padding: 5px;
+}
+
+.button:hover {
+	-fx-color: #0000ff;
+}
+
+.button:pressed {
+	-fx-color: #ffffff;
+}
+
+#headline {
+	-fx-font-size: 40px;
+	-fx-fill: #808080;
+	-fx-stroke: #ffffff;
+    -fx-stroke-width: 1;
+}
+
+#statisTxtArea {
+	-fx-font-size: 14px;
+	-fx-pref-column-count: 20;
+	-fx-pref-row-count: 6;
+}
+
+#mainFuelBox {
+	-fx-border-color: #000000;
+}
+
+#FuelControl {
+	-fx-alignment: center;
+	-fx-background-color: #004080;
+	-fx-padding: 5px;
+	-fx-spacing: 5px;
+}
+#errorText{
+	-fx-font: 15px Castellar;
+	-fx-stroke: red;
+    -fx-stroke-width: 1;
+	
+}
+#confirmText {
+	-fx-font: 15px Castellar;
+	-fx-stroke: #ffffff;
+    -fx-stroke-width: 1;
+}
