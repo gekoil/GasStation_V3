@@ -6,5 +6,4 @@ public interface MainFuelEventListener {
 	void fireFillingTheMainFuel();
 	void fireTheMainFuelIsFull();
 	void fireTheCurrentCapacity(int liters);
-	void fireCantCloseWhileFilling();
 }

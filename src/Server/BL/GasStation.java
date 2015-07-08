@@ -41,7 +41,7 @@ public class GasStation extends Observable {
 	private boolean gasStationClosing = false;
 	private int numOfCarsFuelingUpCurrently;
 	private int numOfCarsInTheGasStationCurrently;
-	
+
 	public GasStation(int numOfPumps, double pricePerLiter, MainFuelPool mfpool, CleaningService cs) {
 		id = idCounter++;
 		this.fuelListeners = new Vector<>();
@@ -71,13 +71,13 @@ public class GasStation extends Observable {
 		GasStationUI.currentFuelState(mfpool.getCurrentCapacity(), this);
 		fireTheMainFuelPoolCapacity();
 	}
-	
+
 	public void enterGasStation(Car car) {
-		gasStationQueue.execute(car);  
+		gasStationQueue.execute(car);
 		numOfCarsInTheGasStationCurrently++;
 	}  // enterGasStation
-	
-	public void fuelUp(Car car) {	
+
+	public void fuelUp(Car car) {
 		synchronized (this) {
 			// choosing the shortest waiting queue
 			boolean queueOnCleanServiceIsShorter = pumps[car.getPumpNum() - 1].checkWhichQueueIsShorter(cs, car, this);
@@ -86,11 +86,11 @@ public class GasStation extends Observable {
 			if (mfpool.getCurrentCapacity() <= 0 || car.getNumOfLiters() > mfpool.getCurrentCapacity()) {
 				GasStationUI.emptyFuelPool(car, this);
 				// if the GasStation has less fuel than the car needs, fire the filling event!
-					if (!isFillingMainFuelPool()) {
-						fireFillUPMainFuelPoolEvent();
-					}
+				if (!isFillingMainFuelPool()) {
+					fireFillUPMainFuelPoolEvent();
+				}
 				// waiting until the MainFuelPool is filled up
-				 do {
+				do {
 					try {
 						fireFillingTheMainFuel();
 						pumps[car.getPumpNum() - 1].lock();
@@ -101,7 +101,7 @@ public class GasStation extends Observable {
 					}
 				} while (isFillingMainFuelPool());
 			}
-			mfpool.setCurrentCapacity(mfpool.getCurrentCapacity() - car.getNumOfLiters());		
+			mfpool.setCurrentCapacity(mfpool.getCurrentCapacity() - car.getNumOfLiters());
 		}
 		// fueling up by the chosen pump
 		Transaction trans = new Transaction();
@@ -110,7 +110,7 @@ public class GasStation extends Observable {
 		trans.amount = car.getNumOfLiters() * pricePerLiter;
 		trans.timeStamp = LocalDateTime.now();
 		trans.type = ServiceType.FUEL;
-		
+
 		pumps[car.getPumpNum()-1].pumpFuelUp(car, mfpool, this);
 
 		statistics.setNumOfCarsFueledUp(statistics.getNumOfCarsFueledUp() + 1);
@@ -123,13 +123,13 @@ public class GasStation extends Observable {
 			}
 		}
 	}  // fuelUp
-	
+
 	public void fireFillUPMainFuelPoolEvent() {
-		super.setChanged(); 
-	    super.notifyObservers(this);
+		super.setChanged();
+		super.notifyObservers(this);
 	}  // fireFillUPMainFuelPoolEvent
-	
-		public void cleanCar(Car car) {
+
+	public void cleanCar(Car car) {
 		// continueToManualClean can be false in case, when the GasStation is closing and
 		// the car didn't pass the AutoClean! So the car shouldn't pass CleanService at all,
 		// if it hasn't begun with the process
@@ -151,7 +151,7 @@ public class GasStation extends Observable {
 		fireCarWashedEvent(car, null);
 		return continueToManualClean;
 	} // autoClean
-	
+
 	public void manualClean(Car car) {
 		// enter the manual-cleaning process and lock the object
 		int num_of_team_to_occupy = 0;
@@ -164,17 +164,16 @@ public class GasStation extends Observable {
 			num_of_team_to_occupy++;
 			if (num_of_team_to_occupy == cs.getNumOfTeams()) {
 				num_of_team_to_occupy = 0;
-			}	
+			}
 		}  // while-loop
 		statistics.setNumOfCarsCleaned(statistics.getNumOfCarsCleaned() + 1);
 		statistics.setCleanProfit(statistics.getCleanProfit() + cs.getPrice());
 	} // manualClean
-	
+
 	public void closeGasStation() {
 		// can't close the gas station while filling up the main fuel pool
 		if (isFillingMainFuelPool) {
-			GasStationUI.cantCloseWhileFillingMainPool(this);
-			fireCantCloseWhileFilling();
+			GasStationUI.cantCloseWhileFillingMainPool(this, statisticsListeners);
 			return;
 		}
 		gasStationClosing = true;
@@ -182,17 +181,16 @@ public class GasStation extends Observable {
 		gasStationQueue.shutdown();
 		GasStationUI.closeGasStation(this);
 		if (numOfCarsInTheGasStationCurrently > 0)
-		    GasStationUI.statWillBeShown(this);
+			GasStationUI.statWillBeShown(this, statisticsListeners);
 		else {
-		    GasStationUI.showStatistics(this, this);
-		    updateStatistics();
+			GasStationUI.showStatistics(this, this);
 		}
 	}  // closeGasStation
-	
+
 	public int getId() {
 		return id;
 	}
-	
+
 	public GasSupplier getSupplier() {
 		return supplier;
 	}
@@ -283,11 +281,36 @@ public class GasStation extends Observable {
 		return "GasStation [numOfPumps=" + numOfPumps + ", pricePerLiter="
 				+ pricePerLiter + ", mfpool=" + mfpool + ", cs=" + cs + "]";
 	}
-	
+
+	public Vector<MainFuelEventListener> getFuelListeners() {
+		return fuelListeners;
+	}
+
+	public void setFuelListeners(Vector<MainFuelEventListener> fuelListeners) {
+		this.fuelListeners = fuelListeners;
+	}
+
+	public Vector<StatisticEventListener> getStatisticsListeners() {
+		return statisticsListeners;
+	}
+
+	public void setStatisticsListeners(
+			Vector<StatisticEventListener> statisticsListeners) {
+		this.statisticsListeners = statisticsListeners;
+	}
+
+	public Vector<CarsEventListener> getCarsEventListeners() {
+		return carsEventListeners;
+	}
+
+	public void setCarsEventListeners(Vector<CarsEventListener> carsEventListeners) {
+		this.carsEventListeners = carsEventListeners;
+	}
+
 	public void addFuelPoolListener(MainFuelEventListener lis) {
 		fuelListeners.add(lis);
 	}
-	
+
 	public void addStatisticsListener(StatisticEventListener lis) {
 		statisticsListeners.add(lis);
 	}
@@ -295,37 +318,32 @@ public class GasStation extends Observable {
 	public void addCarEventListener(CarsEventListener lis) {
 		carsEventListeners.add(lis);
 	}
-	
+
 	protected void fireFillUPMainFuelEvent() {
 		for(MainFuelEventListener l : fuelListeners)
 			l.theMainFuelIsLow(mfpool.getCurrentCapacity());
 	}
-	
+
 	protected void finishedFillTheMainFuel() {
 		for(MainFuelEventListener l : fuelListeners)
 			l.finishedFillTheMainFuel(mfpool.getCurrentCapacity());
 	}
-	
+
 	protected void fireFillingTheMainFuel() {
 		for(MainFuelEventListener l : fuelListeners)
 			l.fireFillingTheMainFuel();
 	}
-	
+
 	protected void fireTheMainFuelIsFull() {
 		for(MainFuelEventListener l : fuelListeners)
 			l.fireTheMainFuelIsFull();
 	}
-	
+
 	protected void fireTheMainFuelPoolCapacity() {
 		for(MainFuelEventListener l : fuelListeners)
 			l.fireTheCurrentCapacity(mfpool.getCurrentCapacity());
 	}
-	
-	protected void fireCantCloseWhileFilling() {
-		for(MainFuelEventListener l : fuelListeners)
-			l.fireCantCloseWhileFilling();
-	}
-	
+
 	protected void updateStatistics() {
 		for(StatisticEventListener l : statisticsListeners)
 			l.ShowStatistics(statistics.toString());
@@ -340,5 +358,5 @@ public class GasStation extends Observable {
 		for(CarsEventListener l : carsEventListeners)
 			l.getFueled(car,t);
 	}
-	
+
 }  // GasStation

@@ -45,10 +45,14 @@ public class Car implements Runnable {
 					gs.fuelUp(this);
 				if (!cleanedUp && wantCleaning)
 					gs.cleanCar(this);
+				if(!wantCleaning && (fueledUp || numOfLiters == 0))
+					break;
+				if(numOfLiters == 0 && cleanedUp)
+					break;
 			}
 			// if the gas station is closing and haven't fueled up yet, go to fuel up!!!
 			while (!fueledUp && numOfLiters > 0) {
-					gs.fuelUp(this);
+				gs.fuelUp(this);
 			}
 			GasStationUI.carLeavingTheGasStation(this, gs);
 			GasStationUI.carLeavingTheGasStation(this, this);
@@ -60,7 +64,7 @@ public class Car implements Runnable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public ClientCar toClientCar() {
 		boolean needWash = false;
 		if (!cleanedUp && wantCleaning)
@@ -88,50 +92,50 @@ public class Car implements Runnable {
 		return numOfLiters;
 	}
 
-    public void setNumOfLiters(int numOfLiters) {
+	public void setNumOfLiters(int numOfLiters) {
 		this.numOfLiters = numOfLiters;
 	}
 
-    public int getPumpNum() {
+	public int getPumpNum() {
 		return pumpNum;
 	}
 
-    public void setPumpNum(int pumpNum) {
+	public void setPumpNum(int pumpNum) {
 		this.pumpNum = pumpNum;
 	}
 
-    public boolean isFueledUp() {
+	public boolean isFueledUp() {
 		return fueledUp;
 	}
 
-    public void setFueledUp(boolean fueledUp) {
+	public void setFueledUp(boolean fueledUp) {
 		this.fueledUp = fueledUp;
 	}
 
-    public boolean isCleanedUp() {
+	public boolean isCleanedUp() {
 		return cleanedUp;
 	}
 
-    public void setCleanedUp(boolean cleanedUp) {
+	public void setCleanedUp(boolean cleanedUp) {
 		this.cleanedUp = cleanedUp;
 	}
 
-    @DuringWash
-    public void readPaper() {
-        System.out.println("Car #" + id + " is reading the paper");
-    }
+	@DuringWash
+	public void readPaper() {
+		System.out.println("Car #" + id + " is reading the paper");
+	}
 
-    @DuringWash
-    public void playGame() {
-        System.out.println("Car #" + id + " is playing a game");
-    }
+	@DuringWash
+	public void playGame() {
+		System.out.println("Car #" + id + " is playing a game");
+	}
 
-    @DuringWash
-    public void talkOnPhone() {
-        System.out.println("Car #" + id + " is talking on the phone");
-    }
+	@DuringWash
+	public void talkOnPhone() {
+		System.out.println("Car #" + id + " is talking on the phone");
+	}
 
-    @Override
+	@Override
 	public String toString() {
 		return "Car [id=" + id + ", wantCleaning=" + wantCleaning
 				+ ", numOfLiters=" + numOfLiters + ", pumpNum=" + pumpNum + "]";

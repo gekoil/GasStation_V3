@@ -12,7 +12,6 @@ import Listeners.*;
 import Views.CarCreatorAbstractView;
 import Views.MainFuelAbstractView;
 import Views.StatisticsAbstractView;
-
 import com.sun.istack.internal.Nullable;
 
 import java.io.IOException;
@@ -20,12 +19,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 public class GasStationController implements MainFuelEventListener,
 		UIFuelEventListener, StatisticEventListener, UIStatisticsListener,
@@ -40,11 +36,12 @@ public class GasStationController implements MainFuelEventListener,
 	private MainFuelAbstractView fuelView;
 	private StatisticsAbstractView statisticView;
 	private CarCreatorAbstractView carView;
+	private ServerSocket listener;
 
 	private HashMap<String, ClientsSocketInfo> clients;
 
 	public GasStationController(GasStation gs, MainFuelAbstractView FuelView,
-			StatisticsAbstractView statisticView, CarCreatorAbstractView carView) {
+								StatisticsAbstractView statisticView, CarCreatorAbstractView carView) {
 		this.gs = gs;
 		this.fuelView = FuelView;
 		this.statisticView = statisticView;
@@ -72,36 +69,40 @@ public class GasStationController implements MainFuelEventListener,
 
 	private void initServer() {
 		try {
-			ServerSocket listener = new ServerSocket(SERVER_PORT);
+			listener = new ServerSocket(SERVER_PORT);
+			listener.setSoTimeout(10000);
 			while (serverRunning) {
-				final Socket client = listener.accept();
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							ClientsSocketInfo clientData = new ClientsSocketInfo(client);
-							clients.put(clientData.getClientAddress(), clientData);
-							Object carInput;
-							do {
-								carInput = clientData.getInputStream().readObject();
-								if(carInput instanceof ClientCar) {
-									// transform to server side Car object
-									ClientCar car = (ClientCar) carInput;
-									Car result = createNewCar(car.getFuel(),car.isNeedWash(), car.getPump(), clientData);
-	
-									// respond with client car with ID
-									if(result == null)
-										clientData.getOutputStream().writeObject(null);
-								}
-							} while(carInput != null);
-						} catch (IOException | ClassNotFoundException e) {
-							e.printStackTrace();
+				try {
+					final Socket client = listener.accept();
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								ClientsSocketInfo clientData = new ClientsSocketInfo(client);
+								clients.put(clientData.getClientAddress(), clientData);
+								Object carInput;
+								do {
+									carInput = clientData.getInputStream().readObject();
+									if(carInput instanceof ClientCar) {
+										// transform to server side Car object
+										ClientCar car = (ClientCar) carInput;
+										Car result = createNewCar(car.getFuel(),car.isNeedWash(), car.getPump(), clientData);
+
+										// respond with client car with ID
+										if(result == null)
+											clientData.getOutputStream().writeObject(null);
+									}
+								} while(carInput != null);
+							} catch (IOException | ClassNotFoundException e) {
+								e.printStackTrace();
+							}
 						}
-					}
-				}).start();
+					}).start();
+				} catch (SocketTimeoutException e) {
+					continue;
+				}
 			}
 			listener.close();
-
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -213,18 +214,11 @@ public class GasStationController implements MainFuelEventListener,
 	public void closeGasStation() {
 		gs.closeGasStation();
 		if(gs.isGasStationClosing()) {
-			ShowStatistics("Start closing operation...\nPlease wait for \"end of day\" statistics.");
 			statisticView.setDisable();
 			fuelView.setDisable();
 			carView.setDisable();
+			serverRunning = false;
 		}
-		
-		serverRunning = false;
-	}
-
-	@Override
-	public void fireCantCloseWhileFilling() {
-		statisticView.setStatistics("The gas station can't be closed\nwhile filling the main fuel pool.");
 	}
 
 	@Override

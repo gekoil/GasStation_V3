@@ -1,13 +1,13 @@
 package Client;
 
+import BL.ClientCar;
+import Listeners.ClientListener;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.LinkedList;
-
-import BL.ClientCar;
-import Listeners.ClientListener;
 
 public class Client extends Thread{
 	private static int SERVER_PORT = 9090;
@@ -17,11 +17,11 @@ public class Client extends Thread{
 	private ObjectOutputStream outputStream;
 	private LinkedList<ClientListener> listeners;
 	private boolean endOfConnection = false;
-	
+
 	public Client() {
 		listeners = new LinkedList<ClientListener>();
 	}
-	
+
 	public void run() {
 		try {
 			socket = new Socket("localhost", SERVER_PORT);
@@ -38,9 +38,9 @@ public class Client extends Thread{
 			new Thread(runInput).start();
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-		} 
+		}
 	}
-	
+
 	public void sendCar(ClientCar car) {
 		try {
 			outputStream.writeObject(car);
@@ -48,7 +48,7 @@ public class Client extends Thread{
 			e.getMessage();
 		}
 	}
-	
+
 	private void carReceiver() {
 		while(!endOfConnection) {
 			try {
@@ -65,15 +65,15 @@ public class Client extends Thread{
 						l.fireIlligalObject();
 				}
 			} catch (ClassNotFoundException | IOException e) {
-				System.out.println(e.getMessage());
+				endOfConection();
 			}
 		}
 	}
-	
+
 	public void registerListener(ClientListener lis) {
 		listeners.add(lis);
 	}
-	
+
 	public synchronized void endOfConection() {
 		if(!endOfConnection) {
 			sendCar(null);

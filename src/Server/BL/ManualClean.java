@@ -1,20 +1,20 @@
 package BL;
 
+import UI.GasStationUI;
+
 import java.io.IOException;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.FileHandler;
-
-import UI.GasStationUI;
 
 // ManualClean is a lock and once it is held, it can't be held by another car simultaneously
 public class ManualClean extends ReentrantLock {
 	private static final long serialVersionUID = 1L;
 	private int teamNum;
 	private FileHandler handler;
-	
+
 	public ManualClean(int num) {
 		this.teamNum = num;
-		try {	
+		try {
 			this.handler = new FileHandler("ManualClean"+this.teamNum+".txt");
 			this.handler.setFormatter(new MyFormat());
 			this.handler.setFilter(new MyObjectFilter(this));
@@ -23,7 +23,7 @@ public class ManualClean extends ReentrantLock {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} 
+		}
 	}
 
 	public int getTeamNum() {
@@ -32,7 +32,7 @@ public class ManualClean extends ReentrantLock {
 	public void setTeamNum(int teamNum) {
 		this.teamNum = teamNum;
 	}
-	
+
 	// this method performs the manual cleaning process!
 	public void manualClean(Car car, CleaningService cs, GasStation gs) {
 		lock();
@@ -47,7 +47,8 @@ public class ManualClean extends ReentrantLock {
 			Thread.sleep(cleanTime);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		} finally {
+			unlock();
 		}
-		unlock();
 	}  // manualClean
 }

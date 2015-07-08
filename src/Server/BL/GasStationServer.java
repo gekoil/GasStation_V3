@@ -5,19 +5,21 @@ import UI.CarCreatorPane;
 import UI.FuelPane;
 import UI.UIStatistics;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
-public class GasStationServer extends Application {
+public class GasStationServer extends Application implements EventHandler<WindowEvent> {
 
     private GasStation gs;
     private static FuelPane fuelPane;
     private static CarCreatorPane carPane;
     private static UIStatistics stat;
-    GasStationController fuelCtrl;
+    private GasStationController gasCtrl;
     private static final String BUILD_DATA = "input.xml";
 
     public static void main(String[] args) {
@@ -30,8 +32,8 @@ public class GasStationServer extends Application {
         gs = creator.CreatGasStation();
         primaryStage.setScene(createScene());
         primaryStage.setTitle("Gas Station");
-
-        fuelCtrl = new GasStationController(gs, fuelPane, stat, carPane);
+        primaryStage.setOnCloseRequest(this);
+        gasCtrl = new GasStationController(gs, fuelPane, stat, carPane);
 
         primaryStage.setMinHeight(500);
         primaryStage.setMinWidth(600);
@@ -57,4 +59,13 @@ public class GasStationServer extends Application {
         border.setRight(carPane);
         return scene;
     }
+
+    @Override
+    public void handle(WindowEvent arg0) {
+        if(!gs.isGasStationClosing()) {
+            arg0.consume();
+            stat.setStatistics("For exit, first close the Gas Station.");
+        }
+    }
+
 }
