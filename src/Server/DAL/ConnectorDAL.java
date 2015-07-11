@@ -28,7 +28,7 @@ public class ConnectorDAL implements IDAL {
 		setupDataSource();
 	}
 
-	public static IDAL getInstance() {
+	public IDAL getInstance() {
 		if (instance == null) {
 			instance = new ConnectorDAL();
 		}
@@ -59,16 +59,15 @@ public class ConnectorDAL implements IDAL {
 			Connection connection = dataSource.getConnection();
 			Statement statement = connection.createStatement();
 			ResultSet res = statement
-					.executeQuery("SELECT ID FROM gas_stations WHERE ID = "
-							+ gs.getId());
-			if (res.first() == false) {
+					.executeQuery("SELECT ID FROM gas_stations WHERE ID = " + gs.getId());
+			if (!res.first()) {
 				int rowCount = statement
 						.executeUpdate("INSERT INTO gas_stations (ID, GAS_REVENUE, CLEAN_REVENUE, CARS_WASHED, CARS_CLEANED) VALUES ("
 								+ gs.getId() + ", 0, 0, 0, 0)");
 				res.close();
 				statement.close();
 				connection.close();
-				setPumps(gs.getPumps(), gs.getId());
+				setPumps(gs.getPumps(), gs);
 				return rowCount > 0;
 			}
 		} catch (SQLException e) {
@@ -78,7 +77,7 @@ public class ConnectorDAL implements IDAL {
 	}
 
 	@Override
-	public boolean setPumps(Pump[] pumps, int gs) {
+	public boolean setPumps(Pump[] pumps, GasStation gs) {
 		Connection connection;
 		try {
 			connection = dataSource.getConnection();
@@ -87,7 +86,7 @@ public class ConnectorDAL implements IDAL {
 			for (int i = 0; i < pumps.length; i++)
 				rows += statement.executeUpdate(String.format(
 						"INSERT INTO pumps (ID, STATION_ID) VALUES (%d, %d)",
-						pumps[i].getNum(), gs));
+						pumps[i].getNum(), gs.getId()));
 			statement.close();
 			connection.close();
 		} catch (SQLException e) {

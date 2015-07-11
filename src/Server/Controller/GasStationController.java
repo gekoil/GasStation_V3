@@ -5,7 +5,6 @@ import BL.Car;
 import BL.ClientCar;
 import BL.ClientsSocketInfo;
 import BL.GasStation;
-import DAL.ConnectorDAL;
 import DAL.IDAL;
 import DAL.Transaction;
 import Listeners.*;
@@ -13,6 +12,8 @@ import Views.CarCreatorAbstractView;
 import Views.MainFuelAbstractView;
 import Views.StatisticsAbstractView;
 import com.sun.istack.internal.Nullable;
+import org.springframework.context.ApplicationContext;
+
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -31,21 +32,22 @@ public class GasStationController implements MainFuelEventListener,
 	private static int SERVER_PORT = 9090;
 
 	private boolean serverRunning = true;
+	private ApplicationContext context;
 	private GasStation gs;
 	private IDAL dbConnector;
 	private MainFuelAbstractView fuelView;
 	private StatisticsAbstractView statisticView;
 	private CarCreatorAbstractView carView;
-	private ServerSocket listener;
 
 	private HashMap<String, ClientsSocketInfo> clients;
 
 	public GasStationController(GasStation gs, MainFuelAbstractView FuelView,
-								StatisticsAbstractView statisticView, CarCreatorAbstractView carView) {
+								StatisticsAbstractView statisticView, CarCreatorAbstractView carView, ApplicationContext context) {
 		this.gs = gs;
 		this.fuelView = FuelView;
 		this.statisticView = statisticView;
 		this.carView = carView;
+		this.context = context;
 		this.gs.addFuelPoolListener(this);
 		this.gs.addStatisticsListener(this);
 		this.gs.addCarEventListener(this);
@@ -53,7 +55,9 @@ public class GasStationController implements MainFuelEventListener,
 		this.statisticView.registerListener(this);
 		this.carView.registerListener(this);
 
-		dbConnector = ConnectorDAL.getInstance();
+		IDAL dalBean = (IDAL)this.context.getBean("iDAL");
+		this.dbConnector = dalBean.getInstance();
+		// this.dbConnector = dbConnector;//ConnectorDAL.getInstance();
 		dbConnector.checkGasStation(gs);
 
 		clients = new HashMap<>();
@@ -69,7 +73,7 @@ public class GasStationController implements MainFuelEventListener,
 
 	private void initServer() {
 		try {
-			listener = new ServerSocket(SERVER_PORT);
+			ServerSocket listener = new ServerSocket(SERVER_PORT);
 			listener.setSoTimeout(10000);
 			while (serverRunning) {
 				try {

@@ -26,6 +26,9 @@ public class ManualClean extends ReentrantLock {
 		}
 	}
 
+	public ManualClean() {
+	}
+
 	public int getTeamNum() {
 		return teamNum;
 	}

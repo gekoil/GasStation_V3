@@ -14,7 +14,7 @@ public class PersistenceDAL implements IDAL {
 
     }
 
-    public static IDAL getInstance() {
+    public IDAL getInstance() {
         if (instance == null) {
             instance = new PersistenceDAL();
         }
@@ -27,7 +27,7 @@ public class PersistenceDAL implements IDAL {
     }
 
     @Override
-    public boolean setPumps(Pump[] pumps, int gs) {
+    public boolean setPumps(Pump[] pumps, GasStation gs) {
         return false;
     }
 

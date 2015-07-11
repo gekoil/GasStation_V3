@@ -16,7 +16,10 @@ public class MainFuelPool extends ReentrantLock {
 		this.maxCapacity = maxCapacity;
 		this.currentCapacity = currentCapacity;
 	}
-	
+
+	public MainFuelPool() {
+	}
+
 	public synchronized void fillMainFuelPool(GasStation gs, int numOfLitersToFill) {
 		// if CurrentCapacity + numOfLitersToFill exceeds the max capacity, fill up to max
 		if (this.getMaxCapacity() - this.getCurrentCapacity() < numOfLitersToFill)

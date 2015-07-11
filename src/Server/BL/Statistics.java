@@ -45,7 +45,7 @@ public class Statistics {
 		this.cleanProfit = cleanProfit;
 	}
 
-	private String getFuelProfitFormated() {
+	private String getFuelProfitFormatted() {
 		return String.format("%.2f", fuelProfit);
 	} // setFuelProfitFormat
 
@@ -53,7 +53,7 @@ public class Statistics {
 	public String toString() {
 		return "Statistics:\nAmount of cars fueled up: " + numOfCarsFueledUp
 				+ "" + "\nAmount of cars cleaned: " + numOfCarsCleaned + " ."
-				+ "\nFuel Profit: " + getFuelProfitFormated() + " ."
+				+ "\nFuel Profit: " + getFuelProfitFormatted() + " ."
 				+ "\nClean Profit: " + cleanProfit + " .";
 	}
 }

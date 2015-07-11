@@ -38,6 +38,9 @@ public class Car implements Runnable {
 		}
 	}
 
+	public Car() {
+	}
+
 	public void run() {
 		try {
 			while ((!cleanedUp || !fueledUp) && !gs.isGasStationClosing()) {

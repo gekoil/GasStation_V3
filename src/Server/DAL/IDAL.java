@@ -12,10 +12,12 @@ import java.util.Vector;
 public interface IDAL {
 	boolean checkGasStation(GasStation gs);
 
-	boolean setPumps(Pump[] pumps, int gs);
+	boolean setPumps(Pump[] pumps, GasStation gs);
 
 	boolean storeTransaction(Transaction transaction);
 
 	Vector<Transaction> getTransactions(LocalDateTime first,
 										LocalDateTime last, int option);
+
+	IDAL getInstance();
 }

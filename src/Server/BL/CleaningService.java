@@ -35,6 +35,9 @@ public class CleaningService {
 		}
 	}
 
+	public CleaningService() {
+	}
+
 	public int getNumOfTeams() {
 		return numOfTeams;
 	}

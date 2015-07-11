@@ -27,7 +27,10 @@ public class Pump extends ReentrantLock{
 			e.printStackTrace();
 		}
 	}
-	
+
+	public Pump() {
+	}
+
 	// this function returns true if the queue on CleanService is shorter than on the pump
 	public synchronized boolean checkWhichQueueIsShorter(CleaningService cs, Car car, GasStation gs) {
 		/** these 2 numbers are for making sure that a car goes to the queue with the 

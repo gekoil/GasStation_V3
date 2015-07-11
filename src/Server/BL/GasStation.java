@@ -42,6 +42,10 @@ public class GasStation extends Observable {
 	private int numOfCarsFuelingUpCurrently;
 	private int numOfCarsInTheGasStationCurrently;
 
+	public GasStation() {
+
+	}
+
 	public GasStation(int numOfPumps, double pricePerLiter, MainFuelPool mfpool, CleaningService cs) {
 		id = idCounter++;
 		this.fuelListeners = new Vector<>();

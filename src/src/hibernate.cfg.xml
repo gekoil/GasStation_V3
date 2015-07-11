@@ -8,6 +8,9 @@
     <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
     <property name="connection.username">root</property>
     <property name="connection.password"/>
+    <property name="hibernate.show_sql">true</property>
+    <property name="hibernate.current_session_context_class">thread</property>
+    <property name="hibernate.query.factory_class">org.hibernate.hql.internal.classic.ClassicQueryTranslatorFactory</property>
     <mapping class="DAL.Entities.CarsEntity"/>
     <mapping class="DAL.Entities.GasStationsEntity"/>
     <mapping class="DAL.Entities.PumpsEntity"/>

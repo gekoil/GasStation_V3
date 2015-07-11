@@ -12,6 +12,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class GasStationServer extends Application implements EventHandler<WindowEvent> {
 
@@ -19,7 +21,6 @@ public class GasStationServer extends Application implements EventHandler<Window
     private static FuelPane fuelPane;
     private static CarCreatorPane carPane;
     private static UIStatistics stat;
-    private GasStationController gasCtrl;
     private static final String BUILD_DATA = "input.xml";
 
     public static void main(String[] args) {
@@ -28,12 +29,13 @@ public class GasStationServer extends Application implements EventHandler<Window
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        ApplicationContext context = new ClassPathXmlApplicationContext("config/beansConfig.xml");
         CreateGsFromXML creator = new CreateGsFromXML(BUILD_DATA);
-        gs = creator.CreatGasStation();
+        gs = creator.CreateGasStation(context);
         primaryStage.setScene(createScene());
         primaryStage.setTitle("Gas Station");
         primaryStage.setOnCloseRequest(this);
-        gasCtrl = new GasStationController(gs, fuelPane, stat, carPane);
+        GasStationController gasCtrl = new GasStationController(gs, fuelPane, stat, carPane, context);//dal);
 
         primaryStage.setMinHeight(500);
         primaryStage.setMinWidth(600);
@@ -61,9 +63,9 @@ public class GasStationServer extends Application implements EventHandler<Window
     }
 
     @Override
-    public void handle(WindowEvent arg0) {
+    public void handle(WindowEvent e) {
         if(!gs.isGasStationClosing()) {
-            arg0.consume();
+            e.consume();
             stat.setStatistics("For exit, first close the Gas Station.");
         }
     }
