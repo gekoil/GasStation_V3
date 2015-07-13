@@ -32,7 +32,7 @@ public class GasStation extends Observable {
 	private MainFuelPool mfpool;
 	private CleaningService cs;
 	// this ServiceExecutor can accept any amount of Runnable objects
-	//(not using FixedThreadPool since we don't know how many cars will enter the gasStation)
+	//(not using FixedThreadPool since we don't know how many cars will enter the gasStationId)
 	private ExecutorService gasStationQueue = Executors.newCachedThreadPool();
 	private Statistics statistics = new Statistics();
 	private GasSupplier supplier = new GasSupplier();
@@ -43,7 +43,22 @@ public class GasStation extends Observable {
 	private int numOfCarsInTheGasStationCurrently;
 
 	public GasStation() {
-
+		id = idCounter++;
+		try {
+			this.handler = new FileHandler("Gas Station Log.txt");
+			this.handler.setFormatter(new MyFormat());
+			this.handler.setFilter(new MyObjectFilter(this));
+			GasStation.getLog().addHandler(this.handler);
+			GasStation.getLog().setUseParentHandlers(false);
+		} catch (SecurityException | IOException e) {
+			e.printStackTrace();
+		}
+		// the GasSupplier is the observer which fills the MainPool up on less than 20% event
+		this.addObserver(supplier);
+		numOfCarsFuelingUpCurrently = 0;
+		numOfCarsInTheGasStationCurrently = 0;
+		//GasStationUI.currentFuelState(mfpool.getCurrentCapacity(), this);
+		//fireTheMainFuelPoolCapacity();
 	}
 
 	public GasStation(int numOfPumps, double pricePerLiter, MainFuelPool mfpool, CleaningService cs) {
@@ -109,7 +124,8 @@ public class GasStation extends Observable {
 		}
 		// fueling up by the chosen pump
 		Transaction trans = new Transaction();
-		trans.gasStation = getId();
+		trans.gasStationId = getId();
+		trans.carId = car.getID();
 		trans.pump = car.getPumpNum();
 		trans.amount = car.getNumOfLiters() * pricePerLiter;
 		trans.timeStamp = LocalDateTime.now();
@@ -142,7 +158,8 @@ public class GasStation extends Observable {
 			manualClean(car);
 		}
 		Transaction trans = new Transaction();
-		trans.gasStation = getId();
+		trans.gasStationId = getId();
+		trans.carId = car.getID();
 		trans.amount = cs.getPrice();
 		trans.timeStamp = LocalDateTime.now();
 		trans.type = ServiceType.CLEANING;

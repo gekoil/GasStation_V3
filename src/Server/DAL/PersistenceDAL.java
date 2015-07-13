@@ -1,5 +1,6 @@
 package DAL;
 
+import BL.Car;
 import BL.GasStation;
 import BL.Pump;
 
@@ -19,6 +20,11 @@ public class PersistenceDAL implements IDAL {
             instance = new PersistenceDAL();
         }
         return instance;
+    }
+
+    @Override
+    public boolean addCar(Car car) {
+        return false;
     }
 
     @Override

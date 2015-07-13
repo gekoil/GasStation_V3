@@ -1,5 +1,6 @@
 package BL;
 
+import DAL.IDAL;
 import org.springframework.context.ApplicationContext;
 import org.w3c.dom.*;
 
@@ -10,40 +11,45 @@ import java.util.Scanner;
 
 
 public class CreateGsFromXML {
-	
-	private GasStation gs;
+
+	private ApplicationContext context;
 	private final String FILE_NAME;
 	
-	public CreateGsFromXML(String fileName) {
+	public CreateGsFromXML(String fileName, ApplicationContext context) {
 		FILE_NAME = fileName;
+		this.context = context;
 	}
 	
-	public GasStation CreateGasStation(ApplicationContext context) {
+	public GasStation CreateGasStation() {
 		// XML DOM-parsed values
-				try {
-					Scanner in = new Scanner(System.in);
-					// reading data from the XML file
-					File inputFile = new File(FILE_NAME);
-					DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-					DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-					Document doc = dBuilder.parse(inputFile);
-					doc.getDocumentElement().normalize();
-					
-					NodeList root = doc.getChildNodes();
-					gs = getGasStationXML(root);
-					Node gasStationNode = getNode("GasStation", root);
-					Car[] cars = getCarsXML(gasStationNode, gs);
+		GasStation gs = null;
+		try {
+			Scanner in = new Scanner(System.in);
+			// reading data from the XML file
+			File inputFile = new File(FILE_NAME);
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(inputFile);
+			doc.getDocumentElement().normalize();
 
-					// inserting the cars(threads) into the gas station
-					if(cars != null && cars.length > 0)
-						for (Car car : cars)
-							gs.enterGasStation(car);
+			NodeList root = doc.getChildNodes();
+			gs = getGasStationXML(root);
+			Node gasStationNode = getNode("GasStation", root);
+			Car[] cars = getCarsXML(gasStationNode, gs);
 
-				} catch (Exception e) {
-					e.printStackTrace();
-					
+			// inserting the cars(threads) into the gas station
+			if(cars != null && cars.length > 0) {
+				IDAL dal = ((IDAL)context.getBean("iDAL")).getInstance();
+				for (Car car : cars) {
+					dal.addCar(car);
+					gs.enterGasStation(car);
 				}
-				return gs;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
+		return gs;
 	}
 	
 	// these functions are for XML data parsing
@@ -68,7 +74,7 @@ public class CreateGsFromXML {
 		    return "";
 		}  // getNodeAttr
 		
-		private static GasStation getGasStationXML(NodeList root) {	
+		private GasStation getGasStationXML(NodeList root) {
 			// getting the GasStation Node
 			Node gasStationNode = getNode("GasStation", root);
 			String numOfPumpsString = getNodeAttr("numOfPumps", gasStationNode);
@@ -104,7 +110,7 @@ public class CreateGsFromXML {
 			return gs;
 		}  // getGasStationXML
 		
-		private static Car[] getCarsXML(Node gasStationNode, GasStation gs) {
+		private Car[] getCarsXML(Node gasStationNode, GasStation gs) {
 			Car[] cars = null;
 			// getting the Cars Node
 			Node carsNode = getNode("Cars", gasStationNode.getChildNodes());
@@ -130,11 +136,23 @@ public class CreateGsFromXML {
 						int numOfLiters = Integer.parseInt(numOfLitersString);
 						String pumpNumString = getNodeAttr("pumpNum", wantsFuelNode);
 						int pumpNum = Integer.parseInt(pumpNumString);
-						// TODO: add call to context and get bean
-						cars[i] = new Car(id, wantCleaning, numOfLiters, pumpNum, gs);
+
+						Car car = (Car)context.getBean("car");
+						car.setId(id);
+						car.setWantCleaning(wantCleaning);
+						car.setNumOfLiters(numOfLiters);
+						car.setPumpNum(pumpNum);
+						car.setGasStation(gs);
+						cars[i] = car;//new Car(id, wantCleaning, numOfLiters, pumpNum, gs);
 					} else {
 						// TODO: add call to context and get bean
-						cars[i] = new Car(id, wantCleaning, 0, -1, gs);
+						Car car = (Car)context.getBean("car");
+						car.setId(id);
+						car.setWantCleaning(wantCleaning);
+						car.setNumOfLiters(0);
+						car.setPumpNum(-1);
+						car.setGasStation(gs);
+						cars[i] = car;//new Car(id, wantCleaning, 0, -1, gs);
 					}
 				}  // for-loop
 			}

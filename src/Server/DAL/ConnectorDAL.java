@@ -1,5 +1,6 @@
 package DAL;
 
+import BL.Car;
 import BL.GasStation;
 import BL.Pump;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
@@ -33,6 +34,23 @@ public class ConnectorDAL implements IDAL {
 			instance = new ConnectorDAL();
 		}
 		return instance;
+	}
+
+	@Override
+	public boolean addCar(Car car) {
+		Connection connection;
+		try {
+			connection = dataSource.getConnection();
+			Statement statement = connection.createStatement();
+			statement.executeUpdate("INSERT INTO cars (ID, GS, WANT_CLEANING, NUM_OF_LITERS, PUMP_NUM) VALUES " +
+					"(" + car.getID() + ", " + car.getGasStation().getId() + ", " + car.isWantCleaning() + ", " + car.getNumOfLiters() + ", " + car.getPumpNum() + ")" +
+					" ON DUPLICATE KEY UPDATE WANT_CLEANING=VALUES(WANT_CLEANING)");
+			statement.close();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	private void defineDriver() {
@@ -103,18 +121,18 @@ public class ConnectorDAL implements IDAL {
 			String query;
 			if (transaction.type == ServiceType.FUEL) {
 				query = String
-						.format("INSERT INTO transactions (STATION_ID, AMOUNT, DATE_ADDED, TIME_ADDED, SERVICE_TYPE, PUMP) VALUES (%s, %s, %s, %s,%s, %s)",
-								transaction.gasStation, transaction.amount,
+						.format("INSERT INTO transactions (STATION_ID, CAR_ID, AMOUNT, DATE_ADDED, TIME_ADDED, SERVICE_TYPE, PUMP) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+								transaction.gasStationId, transaction.carId ,transaction.amount,
 								dateFormat.format(transaction.timeStamp),
 								timeFormat.format(transaction.timeStamp),
 								transaction.type.ordinal(), transaction.pump);
 			} else { // cleaning service
 				query = String
-						.format("INSERT INTO transactions (STATION_ID, AMOUNT, DATE_ADDED, TIME_ADDED, SERVICE_TYPE, PUMP) VALUES (%s, %s, %s, %s,%s, %s)",
-								transaction.gasStation, transaction.amount,
+						.format("INSERT INTO transactions (STATION_ID, CAR_ID, AMOUNT, DATE_ADDED, TIME_ADDED, SERVICE_TYPE, PUMP) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', NULL)",
+								transaction.gasStationId, transaction.carId ,transaction.amount,
 								dateFormat.format(transaction.timeStamp),
 								timeFormat.format(transaction.timeStamp),
-								transaction.type.ordinal(), "Null");
+								transaction.type.ordinal());
 			}
 			int rowCount = statement.executeUpdate(query);
 			statement.close();
@@ -140,8 +158,8 @@ public class ConnectorDAL implements IDAL {
 				Transaction tr = new Transaction();
 				tr.amount = res.getDouble("SUM");
 				tr.pump = res.getInt("PUMP");
-				tr.timeStamp = LocalDateTime.of(res.getDate("DATE")
-						.toLocalDate(), res.getTime("TIME").toLocalTime());
+				tr.timeStamp = LocalDateTime.of(res.getDate("DATE_ADDED")
+						.toLocalDate(), res.getTime("TIME_ADDED").toLocalTime());
 				tr.type = (res.getInt("SERVICE_TYPE") == 0 ? ServiceType.FUEL
 						: ServiceType.CLEANING);
 				trans.add(tr);

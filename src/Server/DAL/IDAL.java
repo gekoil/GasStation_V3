@@ -1,5 +1,6 @@
 package DAL;
 
+import BL.Car;
 import BL.GasStation;
 import BL.Pump;
 
@@ -20,4 +21,6 @@ public interface IDAL {
 										LocalDateTime last, int option);
 
 	IDAL getInstance();
+
+	boolean addCar(Car car);
 }

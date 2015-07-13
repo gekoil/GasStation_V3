@@ -194,20 +194,27 @@ public class GasStationController implements MainFuelEventListener,
 		if(liters < 0)
 			liters = 0;
 
-		Car c = new Car(carId_generator++, wash, liters, pump, gs);
+		Car car = (Car)context.getBean("car");
+		car.setId(carId_generator++);
+		car.setNumOfLiters(liters);
+		car.setPumpNum(pump);
+		car.setWantCleaning(wash);
+		car.setGasStation(gs);
+		//Car c = new Car(carId_generator++, wash, liters, pump, gs);
+		dbConnector.addCar(car);
 		if(owner != null) {
-			c.setOwner(owner);
+			car.setOwner(owner);
 			try {
-				owner.getOutputStream().writeObject(c.toClientCar());
+				owner.getOutputStream().writeObject(car.toClientCar());
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
 			}
 		}
 
 		try {
-			gs.enterGasStation(c);
-			carView.updateConfirmMessege("You Successfully create new car.\n" + "ID: " + c.getID());
-			return c;
+			gs.enterGasStation(car);
+			carView.updateConfirmMessege("You Successfully create new car.\n" + "ID: " + car.getID());
+			return car;
 		} catch (Exception e) {
 			carView.updateErrorMessege(e.getMessage());
 			return null;
