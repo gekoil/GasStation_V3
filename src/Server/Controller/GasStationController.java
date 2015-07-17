@@ -30,6 +30,7 @@ public class GasStationController implements MainFuelEventListener,
 
 	private static int carId_generator = 9000;
 	private static int SERVER_PORT = 9090;
+	private Integer counter = 0;
 
 	private boolean serverRunning = true;
 	private ApplicationContext context;
@@ -39,7 +40,7 @@ public class GasStationController implements MainFuelEventListener,
 	private StatisticsAbstractView statisticView;
 	private CarCreatorAbstractView carView;
 
-	private HashMap<String, ClientsSocketInfo> clients;
+	private HashMap<Integer, ClientsSocketInfo> clients;
 
 	public GasStationController(GasStation gs, MainFuelAbstractView FuelView,
 								StatisticsAbstractView statisticView, CarCreatorAbstractView carView, ApplicationContext context) {
@@ -83,7 +84,8 @@ public class GasStationController implements MainFuelEventListener,
 						public void run() {
 							try {
 								ClientsSocketInfo clientData = new ClientsSocketInfo(client);
-								clients.put(clientData.getClientAddress(), clientData);
+								clients.put(addClient(), clientData);
+								clientData.getOutputStream().writeObject((Integer)gs.getPumps().length);
 								Object carInput;
 								do {
 									carInput = clientData.getInputStream().readObject();
@@ -109,6 +111,12 @@ public class GasStationController implements MainFuelEventListener,
 			listener.close();
 		} catch(Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	protected int addClient() {
+		synchronized (counter) {
+			return counter++;
 		}
 	}
 

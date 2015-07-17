@@ -60,7 +60,8 @@ public class Client extends Thread{
 					for(ClientListener l : listeners)
 						l.updateCarInfo(car);
 				}
-				else {
+				else if(temp instanceof Integer) {
+					int pump = (int) temp;
 					for(ClientListener l : listeners)
 						l.fireIlligalObject();
 				}

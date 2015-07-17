@@ -24,7 +24,7 @@ public class CarRegisterUI extends JPanel implements AbstractRegisterView {
 	private JCheckBox washCbx;
 	private JComboBox<Integer> pumpCmb;
 	private JButton submitBtn;
-	private int pump = 1;
+	private int pumpNo = 1;
 	private LinkedList<RegisterUIListener> listeners;
 
 	public CarRegisterUI(int pumpsNum) {
@@ -50,18 +50,7 @@ public class CarRegisterUI extends JPanel implements AbstractRegisterView {
 		fuelFld = new JTextField(4);
 		fuelFld.setText("Liters");
 		washCbx = new JCheckBox();
-		
-		Integer[] pumps = new Integer[pumpsNum];
-		for (int i = 0; i < pumpsNum; i++)
-			pumps[i] = i + 1;
-		pumpCmb = new JComboBox<Integer>(pumps);
-		pumpCmb.addActionListener(new ActionListener() {	
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				pump = (int) ((JComboBox<Integer>) arg0.getSource()).getSelectedItem();
-			}
-		});
-		
+		setPumpsNumber(0);
 		submitBtn = new JButton("Submit");
 		submitBtn.addActionListener(new ActionListener() {
 			@Override
@@ -70,7 +59,7 @@ public class CarRegisterUI extends JPanel implements AbstractRegisterView {
 					int fuel = Integer.parseInt(fuelFld.getText());
 					boolean wash = washCbx.isSelected();
 					for(RegisterUIListener lis : listeners)
-						lis.fireNewCar(fuel, wash, pump);
+						lis.fireNewCar(fuel, wash, pumpNo);
 					fuelFld.setText("Liters");
 					washCbx.setSelected(false);
 					pumpCmb.validate();
@@ -84,6 +73,21 @@ public class CarRegisterUI extends JPanel implements AbstractRegisterView {
 	@Override
 	public void registeListener(RegisterUIListener lis) {
 		listeners.add(lis);
+	}
+
+	@Override
+	public void setPumpsNumber(int pumps) {
+		Integer[] pump = new Integer[pumps];
+		for (int i = 0; i < pumps; i++)
+			pump[i] = i + 1;
+		pumpCmb = new JComboBox<Integer>(pump);
+		pumpCmb.addActionListener(new ActionListener() {	
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				pumpNo = (int) ((JComboBox<Integer>) arg0.getSource()).getSelectedItem();
+			}
+		});
+		
 	}
 
 }

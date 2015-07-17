@@ -58,4 +58,9 @@ public class ClientController implements ClientListener, RegisterUIListener,
 	public void fireIlligalObject() {
 	}
 
+	@Override
+	public void updatePumpsNumber(int pumps) {
+		newCarView.setPumpsNumber(pumps);
+	}
+
 }
