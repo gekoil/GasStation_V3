@@ -1,5 +1,6 @@
 package BL;
 
+import DAL.Entities.GasStationsEntity;
 import DAL.ServiceType;
 import DAL.Transaction;
 import Listeners.CarsEventListener;
@@ -70,7 +71,7 @@ public class GasStation extends Observable {
 		this.pricePerLiter = pricePerLiter;
 		this.pumps = new Pump[numOfPumps];
 		for (int i = 0; i < numOfPumps; i++) {
-			pumps[i] = new Pump((i+1));
+			pumps[i] = new Pump((i+1), this);
 		}
 		this.mfpool = mfpool;
 		this.cs = cs;
@@ -99,7 +100,7 @@ public class GasStation extends Observable {
 	public void fuelUp(Car car) {
 		synchronized (this) {
 			// choosing the shortest waiting queue
-			boolean queueOnCleanServiceIsShorter = pumps[car.getPumpNum() - 1].checkWhichQueueIsShorter(cs, car, this);
+			boolean queueOnCleanServiceIsShorter = pumps[car.getPumpNum() - 1].checkWhichQueueIsShorter(cs, car);
 			if (queueOnCleanServiceIsShorter)
 				return;
 			if (mfpool.getCurrentCapacity() <= 0 || car.getNumOfLiters() > mfpool.getCurrentCapacity()) {
@@ -131,7 +132,7 @@ public class GasStation extends Observable {
 		trans.timeStamp = LocalDateTime.now();
 		trans.type = ServiceType.FUEL;
 
-		pumps[car.getPumpNum()-1].pumpFuelUp(car, mfpool, this);
+		pumps[car.getPumpNum()-1].pumpFuelUp(car, mfpool);
 
 		statistics.setNumOfCarsFueledUp(statistics.getNumOfCarsFueledUp() + 1);
 		statistics.setFuelProfit(statistics.getFuelProfit() + pricePerLiter * car.getNumOfLiters());
@@ -372,12 +373,22 @@ public class GasStation extends Observable {
 
 	protected void fireCarWashedEvent(Car car, Transaction t) {
 		for(CarsEventListener l : carsEventListeners)
-			l.getWashed(car,t);
+			l.getWashed(car, t);
 	}
 
 	protected void fireCarFueledEvent(Car car, Transaction t) {
 		for(CarsEventListener l : carsEventListeners)
-			l.getFueled(car,t);
+			l.getFueled(car, t);
 	}
 
+	public GasStationsEntity toEntity() {
+		GasStationsEntity entity = new GasStationsEntity();
+		//entity.setGasRevenue(this.get);
+		entity.setId(this.getId());
+		entity.setGasRevenue(this.statistics.getFuelProfit());
+		entity.setCleanRevenue(this.statistics.getCleanProfit());
+		entity.setCarsFueled(this.statistics.getNumOfCarsFueledUp());
+		entity.setCarsCleaned(this.statistics.getNumOfCarsCleaned());
+		return entity;
+	}
 }  // GasStation

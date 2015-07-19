@@ -11,7 +11,7 @@ public class GasStationsEntity {
     private int id;
     private double gasRevenue;
     private double cleanRevenue;
-    private int carsWashed;
+    private int carsFueled;
     private int carsCleaned;
 
     @Id
@@ -45,13 +45,13 @@ public class GasStationsEntity {
     }
 
     @Basic
-    @Column(name = "CARS_WASHED")
-    public int getCarsWashed() {
-        return carsWashed;
+    @Column(name = "CARS_FUELED")
+    public int getCarsFueled() {
+        return carsFueled;
     }
 
-    public void setCarsWashed(int carsWashed) {
-        this.carsWashed = carsWashed;
+    public void setCarsFueled(int carsWashed) {
+        this.carsFueled = carsWashed;
     }
 
     @Basic
@@ -74,7 +74,7 @@ public class GasStationsEntity {
         if (id != that.id) return false;
         if (Double.compare(that.gasRevenue, gasRevenue) != 0) return false;
         if (Double.compare(that.cleanRevenue, cleanRevenue) != 0) return false;
-        if (carsWashed != that.carsWashed) return false;
+        if (carsFueled != that.carsFueled) return false;
         if (carsCleaned != that.carsCleaned) return false;
 
         return true;
@@ -89,7 +89,7 @@ public class GasStationsEntity {
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         temp = Double.doubleToLongBits(cleanRevenue);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + carsWashed;
+        result = 31 * result + carsFueled;
         result = 31 * result + carsCleaned;
         return result;
     }

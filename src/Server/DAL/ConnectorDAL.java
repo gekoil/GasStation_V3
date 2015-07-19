@@ -80,7 +80,7 @@ public class ConnectorDAL implements IDAL {
 					.executeQuery("SELECT ID FROM gas_stations WHERE ID = " + gs.getId());
 			if (!res.first()) {
 				int rowCount = statement
-						.executeUpdate("INSERT INTO gas_stations (ID, GAS_REVENUE, CLEAN_REVENUE, CARS_WASHED, CARS_CLEANED) VALUES ("
+						.executeUpdate("INSERT INTO gas_stations (ID, GAS_REVENUE, CLEAN_REVENUE, CARS_FUELED, CARS_CLEANED) VALUES ("
 								+ gs.getId() + ", 0, 0, 0, 0)");
 				res.close();
 				statement.close();

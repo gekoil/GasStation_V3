@@ -1,5 +1,6 @@
 package BL;
 
+import DAL.Entities.CarsEntity;
 import UI.GasStationUI;
 import Annotations.DuringWash;
 
@@ -123,6 +124,17 @@ public class Car implements Runnable {
 		this.cleanedUp = cleanedUp;
 	}
 
+	public void initLogger() {
+		try {
+			this.handler = new FileHandler("Car_ID"+this.id+" Log.txt");
+			this.handler.setFormatter(new MyFormat());
+			this.handler.setFilter(new MyObjectFilter(this));
+			GasStation.getLog().addHandler(this.handler);
+		} catch (SecurityException | IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	@DuringWash
 	public void readPaper() {
 		System.out.println("Car #" + id + " is reading the paper");
@@ -158,5 +170,17 @@ public class Car implements Runnable {
 
 	public GasStation getGasStation() {
 		return gs;
+	}
+
+	public CarsEntity toEntity() {
+		CarsEntity entity = new CarsEntity();
+		entity.setId(this.getID());
+		entity.setWantCleaning(this.isWantCleaning());
+		entity.setNumOfLiters(this.getNumOfLiters());
+		entity.setPumpNum(this.getPumpNum());
+		entity.setGs(this.getGasStation().getId());
+		entity.setFueledUp(this.isFueledUp());
+		entity.setCleanedUp(this.isCleanedUp());
+		return entity;
 	}
 }

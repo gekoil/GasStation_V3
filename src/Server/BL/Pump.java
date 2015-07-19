@@ -1,21 +1,24 @@
 package BL;
 
+import DAL.Entities.PumpsEntity;
+import UI.GasStationUI;
+
 import java.io.IOException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.FileHandler;
 
-import UI.GasStationUI;
-
 // Pump is a lock and once it is held, it can't be held by another car simultaneously
 public class Pump extends ReentrantLock{
 	private static final long serialVersionUID = 1L;
 	private int num;
+	private GasStation station;
 	private FileHandler handler;
 	private Condition isEligibleToFuelUp = this.newCondition();
 	
-	public Pump(int num) {
+	public Pump(int num, GasStation gasStation) {
 		this.num = num;
+		this.station = gasStation;
 		try {
 			this.handler = new FileHandler("Pump_Number" + this.num + ".txt");
 			this.handler.setFormatter(new MyFormat());
@@ -32,7 +35,7 @@ public class Pump extends ReentrantLock{
 	}
 
 	// this function returns true if the queue on CleanService is shorter than on the pump
-	public synchronized boolean checkWhichQueueIsShorter(CleaningService cs, Car car, GasStation gs) {
+	public synchronized boolean checkWhichQueueIsShorter(CleaningService cs, Car car) { //, GasStation gs) {
 		/** these 2 numbers are for making sure that a car goes to the queue with the 
 		 * least amount of waiters, INCLUDING THE CARS HOLDING THE LOCK, so that 
 		 * we reduce the total waiting time in the gas station! */
@@ -43,27 +46,27 @@ public class Pump extends ReentrantLock{
 		if (isLocked())
 			isPumpLocked = 1;
 		if (getQueueLength() + isPumpLocked > cs.getAutoClean().getQueueLength() + isAutoCleanLocked 
-			&& !car.isCleanedUp() && !gs.isGasStationClosing()) {
+			&& !car.isCleanedUp() && !station.isGasStationClosing()) {
 			return true;
 		}
 		return false;
 	}
 	
-	public void pumpFuelUp(Car car, MainFuelPool mfpool, GasStation gs) {
+	public void pumpFuelUp(Car car, MainFuelPool mfpool) {//, GasStation gs) {
 		// locks the needed pump in order to fuel up, so that another car can't hold it
 		lock();
 		int fuelingUpTime = car.getNumOfLiters() * 100;
 		// wait while filling the main fuel pool
-		while (gs.isFillingMainFuelPool() || gs.getMfpool().isWaitingToFillMainPool()) {
+		while (station.isFillingMainFuelPool() || station.getMfpool().isWaitingToFillMainPool()) {
 			try {
 				this.isEligibleToFuelUp.await();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		gs.setNumOfCarsFuelingUpCurrently(gs.getNumOfCarsFuelingUpCurrently()+1);
+		station.setNumOfCarsFuelingUpCurrently(station.getNumOfCarsFuelingUpCurrently()+1);
 		// this is for writing to the appropriate files! (Car, Pump, GasStation) - Logger
-		GasStationUI.fuelingUp(car, fuelingUpTime, car.getPumpNum(), gs);
+		GasStationUI.fuelingUp(car, fuelingUpTime, car.getPumpNum(), station);
 		GasStationUI.fuelingUp(car, fuelingUpTime, car.getPumpNum(), car);
 		GasStationUI.fuelingUp(car, fuelingUpTime, car.getPumpNum(), this);
 		try {
@@ -73,16 +76,16 @@ public class Pump extends ReentrantLock{
 			e.printStackTrace();
 		}
 		car.setFueledUp(true);
-		GasStationUI.finishedfuelingUp(car, fuelingUpTime, car.getPumpNum(), gs);
+		GasStationUI.finishedfuelingUp(car, fuelingUpTime, car.getPumpNum(), station);
 		GasStationUI.finishedfuelingUp(car, fuelingUpTime, car.getPumpNum(), car);
 		GasStationUI.finishedfuelingUp(car, fuelingUpTime, car.getPumpNum(), this);
-		gs.setNumOfCarsFuelingUpCurrently(gs.getNumOfCarsFuelingUpCurrently()-1);
+		station.setNumOfCarsFuelingUpCurrently(station.getNumOfCarsFuelingUpCurrently()-1);
 		unlock();	
 		// if the MainFuelPool is waiting to get filled up, signal it on the condition
-		if (gs.getNumOfCarsFuelingUpCurrently() == 0) {
-			gs.getMfpool().lock();
-				gs.getMfpool().getIsEligibleToFillUpMainPool().signalAll();
-			gs.getMfpool().unlock();
+		if (station.getNumOfCarsFuelingUpCurrently() == 0) {
+			station.getMfpool().lock();
+				station.getMfpool().getIsEligibleToFillUpMainPool().signalAll();
+			station.getMfpool().unlock();
 		}
 	}  // pumpFuelUp
 	
@@ -97,5 +100,12 @@ public class Pump extends ReentrantLock{
 	}
 	public void setIsEligibleToFuelUp(Condition isEligibleToFuelUp) {
 		this.isEligibleToFuelUp = isEligibleToFuelUp;
+	}
+
+	public PumpsEntity getEntity() {
+		PumpsEntity entity = new PumpsEntity();
+		entity.setId(this.getNum());
+		entity.setStationId(this.station.getId());
+		return entity;
 	}
 }  // Pump

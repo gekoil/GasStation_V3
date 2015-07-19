@@ -12,7 +12,7 @@ import Views.CarCreatorAbstractView;
 import Views.MainFuelAbstractView;
 import Views.StatisticsAbstractView;
 
-import com.carsInfo.GetCarInfo;
+import com.information.CarInfo;
 import com.sun.istack.internal.Nullable;
 
 import org.springframework.context.ApplicationContext;
@@ -41,7 +41,7 @@ public class GasStationController implements MainFuelEventListener,
 	private MainFuelAbstractView fuelView;
 	private StatisticsAbstractView statisticView;
 	private CarCreatorAbstractView carView;
-	private GetCarInfo carInfo;
+	private CarInfo carInfo;
 
 	private HashMap<Integer, ClientsSocketInfo> clients;
 
@@ -58,7 +58,7 @@ public class GasStationController implements MainFuelEventListener,
 		this.fuelView.registerListener(this);
 		this.statisticView.registerListener(this);
 		this.carView.registerListener(this);
-		this.carInfo = new GetCarInfo(this);
+		this.carInfo = new CarInfo(this);
 
 		IDAL dalBean = (IDAL)this.context.getBean("iDAL");
 		this.dbConnector = dalBean.getInstance();
@@ -212,6 +212,7 @@ public class GasStationController implements MainFuelEventListener,
 		car.setPumpNum(pump);
 		car.setWantCleaning(wash);
 		car.setGasStation(gs);
+		car.initLogger();
 		//Car c = new Car(carId_generator++, wash, liters, pump, gs);
 		dbConnector.addCar(car);
 		if(owner != null) {
