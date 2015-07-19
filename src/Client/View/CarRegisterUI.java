@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import sun.security.krb5.internal.PAEncTSEnc;
 import Listeners.RegisterUIListener;
 
 public class CarRegisterUI extends JPanel implements AbstractRegisterView {
@@ -25,13 +26,18 @@ public class CarRegisterUI extends JPanel implements AbstractRegisterView {
 	private JComboBox<Integer> pumpCmb;
 	private JButton submitBtn;
 	private int pumpNo = 1;
+	private JPanel panel;
+	private Integer[] pump;
+	private GridLayout grid;
 	private LinkedList<RegisterUIListener> listeners;
 
-	public CarRegisterUI(int pumpsNum) {
+	public CarRegisterUI() {
 		listeners = new LinkedList<RegisterUIListener>();
-		createComponents(pumpsNum);
-		GridLayout grid = new GridLayout(0, 2, 10, 10);
-		JPanel panel = new JPanel(grid);
+	}
+	
+	private void setComponent() {
+		grid = new GridLayout(0, 2, 10, 10);
+		panel = new JPanel(grid);
 		panel.add(fuelLbl);
 		panel.add(fuelFld);
 		panel.add(washLbl);
@@ -50,7 +56,18 @@ public class CarRegisterUI extends JPanel implements AbstractRegisterView {
 		fuelFld = new JTextField(4);
 		fuelFld.setText("Liters");
 		washCbx = new JCheckBox();
-		setPumpsNumber(0);
+		
+		pump = new Integer[pumpsNum];
+		for (int i = 0; i < pumpsNum; i++)
+			pump[i] = i + 1;
+		pumpCmb = new JComboBox<Integer>(pump);
+		pumpCmb.addActionListener(new ActionListener() {	
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				pumpNo = (int) ((JComboBox<Integer>) arg0.getSource()).getSelectedItem();
+			}
+		});
+		
 		submitBtn = new JButton("Submit");
 		submitBtn.addActionListener(new ActionListener() {
 			@Override
@@ -77,17 +94,7 @@ public class CarRegisterUI extends JPanel implements AbstractRegisterView {
 
 	@Override
 	public void setPumpsNumber(int pumps) {
-		Integer[] pump = new Integer[pumps];
-		for (int i = 0; i < pumps; i++)
-			pump[i] = i + 1;
-		pumpCmb = new JComboBox<Integer>(pump);
-		pumpCmb.addActionListener(new ActionListener() {	
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				pumpNo = (int) ((JComboBox<Integer>) arg0.getSource()).getSelectedItem();
-			}
-		});
-		
+		createComponents(pumps);
+		setComponent();
 	}
-
 }

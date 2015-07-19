@@ -20,7 +20,7 @@ public class MainFrame {
 	private static JTabbedPane createContentPane() {
 		tabedPane = new JTabbedPane();
 		tabedPane.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-		register = new CarRegisterUI(3);
+		register = new CarRegisterUI();
 		connect = new ConnectionView();
 		BorderLayout border = new BorderLayout(10, 10);
 		JPanel panel = new JPanel(border);

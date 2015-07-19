@@ -63,7 +63,7 @@ public class Client extends Thread{
 				else if(temp instanceof Integer) {
 					int pump = (int) temp;
 					for(ClientListener l : listeners)
-						l.fireIlligalObject();
+						l.updatePumpsNumber(pump);
 				}
 			} catch (ClassNotFoundException | IOException e) {
 				endOfConection();
