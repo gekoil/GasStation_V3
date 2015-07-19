@@ -196,4 +196,26 @@ public class ConnectorDAL implements IDAL {
 		}
 		return select;
 	}
+	
+	@Override
+	public String getCarFee(int id) {
+		String sumFee = "";
+		try {
+			Connection connection = dataSource.getConnection();
+			Statement statement = connection.createStatement();
+			//SELECT DATE_ADDED, TIME_ADDED, PUMP, SERVICE_TYPE, SUM(AMOUNT) AS 'SUM' FROM transactions "
+			Vector<Transaction> trans = new Vector<Transaction>();
+			ResultSet res = statement.executeQuery("SELECT SUM(AMOUNT) AS 'FEE' FROM transactions WHERE CAR_ID = " + id);
+			if(res.getRow() != 0)
+				sumFee += res.getDouble("FEE");
+			else
+				sumFee = "Car No." + id + " is not exist.";
+			res.close();
+			statement.close();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return sumFee;
+	}
 }

@@ -46,4 +46,9 @@ public class PersistenceDAL implements IDAL {
     public Vector<Transaction> getTransactions(LocalDateTime first, LocalDateTime last, int option) {
         return null;
     }
+
+	@Override
+	public String getCarFee(int id) {
+		return "";
+	}
 }

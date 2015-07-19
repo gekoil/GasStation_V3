@@ -11,9 +11,11 @@ import Listeners.*;
 import Views.CarCreatorAbstractView;
 import Views.MainFuelAbstractView;
 import Views.StatisticsAbstractView;
-import com.sun.istack.internal.Nullable;
-import org.springframework.context.ApplicationContext;
 
+import com.carsInfo.GetCarInfo;
+import com.sun.istack.internal.Nullable;
+
+import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -39,6 +41,7 @@ public class GasStationController implements MainFuelEventListener,
 	private MainFuelAbstractView fuelView;
 	private StatisticsAbstractView statisticView;
 	private CarCreatorAbstractView carView;
+	private GetCarInfo carInfo;
 
 	private HashMap<Integer, ClientsSocketInfo> clients;
 
@@ -55,6 +58,7 @@ public class GasStationController implements MainFuelEventListener,
 		this.fuelView.registerListener(this);
 		this.statisticView.registerListener(this);
 		this.carView.registerListener(this);
+		this.carInfo = new GetCarInfo(this);
 
 		IDAL dalBean = (IDAL)this.context.getBean("iDAL");
 		this.dbConnector = dalBean.getInstance();
@@ -295,6 +299,10 @@ public class GasStationController implements MainFuelEventListener,
 	public Vector<Transaction> getHistory(LocalDateTime firstDate, LocalDateTime lastDate, int option) {
 		Vector<Transaction> trans = dbConnector.getTransactions(firstDate, lastDate, option);
 		return trans;
+	}
+	
+	public String getCarFee(int id) {
+		return dbConnector.getCarFee(id);
 	}
 
 }

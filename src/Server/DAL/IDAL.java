@@ -23,4 +23,6 @@ public interface IDAL {
 	IDAL getInstance();
 
 	boolean addCar(Car car);
+	
+	String getCarFee(int id);
 }
