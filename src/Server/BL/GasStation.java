@@ -23,7 +23,8 @@ import java.util.logging.Logger;
 // GasStation is Observable since it fires the "less than 20%" event
 // GasSupplier listens on the event and fills the MainFuelPool on fire
 public class GasStation extends Observable {
-	private static final Logger LOG = Logger.getLogger("Gas_Station Logger");
+	public  static final String LOGGER_NAME = "Gas_Station Logger";
+	private static final Logger LOG = Logger.getLogger(LOGGER_NAME);
 	private static int idCounter = 0;
 	private int id;
 	private FileHandler handler;

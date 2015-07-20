@@ -29,7 +29,7 @@ public class GasStationServer extends Application implements EventHandler<Window
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        ApplicationContext context = new ClassPathXmlApplicationContext("../config/beansConfig.xml");
+        ApplicationContext context = new ClassPathXmlApplicationContext("config/beansConfig.xml");
         CreateGsFromXML creator = new CreateGsFromXML(BUILD_DATA, context);
         gs = creator.CreateGasStation();
         primaryStage.setScene(createScene());

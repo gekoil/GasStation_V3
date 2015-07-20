@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-                           http://www.springframework.org/schema/beans/spring-beans.xsd">
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/aop
+                           http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
     <bean id="gasStation" class="BL.GasStation" scope="prototype"/>
     <bean id="car" class="BL.Car" scope="prototype"/>
     <bean id="cleaning" class="BL.CleaningService" scope="prototype"/>
@@ -13,4 +16,16 @@
     <bean id="statistics" class="BL.Statistics" scope="prototype"/>
     <!--<bean id="iDAL" class="DAL.ConnectorDAL"/>-->
     <bean id="iDAL" class="DAL.PersistenceDAL" />
+
+    <aop:aspectj-autoproxy>
+        <aop:include name="aspectLogger"/>
+    </aop:aspectj-autoproxy>
+    <aop:config>
+        <aop:pointcut id="loggingPointcut" expression="@annotation(Loggable)"/>
+        <aop:aspect id="loggingAspect" ref="aspectLogger">
+            <aop:around pointcut-ref="loggingPointcut" method="logAfter"/>
+        </aop:aspect>
+    </aop:config>
+    <bean id="aspectLogger" class="Aspects.LoggingAspect"/>
+
 </beans>

@@ -11,6 +11,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
 
 import java.sql.Date;
@@ -28,11 +29,15 @@ public class PersistenceDAL implements IDAL {
 
     private SessionFactory factory;
 
-    private PersistenceDAL() {
-
-        Configuration configuration = new Configuration().configure();
-        ServiceRegistryBuilder builder = new ServiceRegistryBuilder().applySettings(configuration.getProperties());
-        factory = configuration.buildSessionFactory(builder.buildServiceRegistry());
+     private PersistenceDAL() {
+        Configuration configuration = new Configuration();
+        configuration.configure("hibernate.cfg.xml");
+        ServiceRegistry serviceRegistry = new ServiceRegistryBuilder().applySettings(
+                configuration.getProperties()).buildServiceRegistry();
+        factory = configuration.buildSessionFactory(serviceRegistry);
+        //Configuration configuration = new Configuration().configure();
+        //ServiceRegistryBuilder builder = new ServiceRegistryBuilder().applySettings(configuration.getProperties());
+        //factory = configuration.buildSessionFactory(builder.buildServiceRegistry());
     }
 
     public IDAL getInstance() {
