@@ -5,6 +5,7 @@ import BL.GasStation;
 import BL.Pump;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Vector;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Vector;
 public interface IDAL {
 	boolean checkGasStation(GasStation gs);
 
-	boolean setPumps(Pump[] pumps, GasStation gs);
+	boolean setPumps(ArrayList<Pump> pumps, GasStation gs);
 
 	boolean storeTransaction(Transaction transaction);
 

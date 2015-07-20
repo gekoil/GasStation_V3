@@ -7,9 +7,11 @@ import Listeners.CarsEventListener;
 import Listeners.MainFuelEventListener;
 import Listeners.StatisticEventListener;
 import UI.GasStationUI;
+import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
@@ -29,7 +31,7 @@ public class GasStation extends Observable {
 	private Vector<CarsEventListener> carsEventListeners;
 	private int numOfPumps;
 	private double pricePerLiter;
-	private Pump[] pumps;
+	private ArrayList<Pump> pumps;
 	private MainFuelPool mfpool;
 	private CleaningService cs;
 	// this ServiceExecutor can accept any amount of Runnable objects
@@ -45,6 +47,9 @@ public class GasStation extends Observable {
 
 	public GasStation() {
 		id = idCounter++;
+		this.fuelListeners = new Vector<>();
+		this.statisticsListeners = new Vector<>();
+		this.carsEventListeners = new Vector<>();
 		try {
 			this.handler = new FileHandler("Gas Station Log.txt");
 			this.handler.setFormatter(new MyFormat());
@@ -58,20 +63,19 @@ public class GasStation extends Observable {
 		this.addObserver(supplier);
 		numOfCarsFuelingUpCurrently = 0;
 		numOfCarsInTheGasStationCurrently = 0;
-		//GasStationUI.currentFuelState(mfpool.getCurrentCapacity(), this);
-		//fireTheMainFuelPoolCapacity();
 	}
 
-	public GasStation(int numOfPumps, double pricePerLiter, MainFuelPool mfpool, CleaningService cs) {
+	public GasStation(int numOfPumps, double pricePerLiter, MainFuelPool mfpool, CleaningService cs, ApplicationContext context) {
 		id = idCounter++;
 		this.fuelListeners = new Vector<>();
 		this.statisticsListeners = new Vector<>();
 		this.carsEventListeners = new Vector<>();
 		this.numOfPumps = numOfPumps;
 		this.pricePerLiter = pricePerLiter;
-		this.pumps = new Pump[numOfPumps];
+		this.pumps = new ArrayList<>();//Pump[numOfPumps];
 		for (int i = 0; i < numOfPumps; i++) {
-			pumps[i] = new Pump((i+1), this);
+			//pumps[i] = new Pump((i+1), this);
+			pumps.add(new Pump((i+1), this));
 		}
 		this.mfpool = mfpool;
 		this.cs = cs;
@@ -100,7 +104,8 @@ public class GasStation extends Observable {
 	public void fuelUp(Car car) {
 		synchronized (this) {
 			// choosing the shortest waiting queue
-			boolean queueOnCleanServiceIsShorter = pumps[car.getPumpNum() - 1].checkWhichQueueIsShorter(cs, car);
+			//pumps[car.getPumpNum() - 1].checkWhichQueueIsShorter(cs, car);
+			boolean queueOnCleanServiceIsShorter = pumps.get(car.getPumpNum() - 1).checkWhichQueueIsShorter(cs, car);
 			if (queueOnCleanServiceIsShorter)
 				return;
 			if (mfpool.getCurrentCapacity() <= 0 || car.getNumOfLiters() > mfpool.getCurrentCapacity()) {
@@ -113,9 +118,9 @@ public class GasStation extends Observable {
 				do {
 					try {
 						fireFillingTheMainFuel();
-						pumps[car.getPumpNum() - 1].lock();
-						pumps[car.getPumpNum() - 1].getIsEligibleToFuelUp().await();
-						pumps[car.getPumpNum() - 1].unlock();
+						pumps.get(car.getPumpNum() - 1).lock();//pumps[car.getPumpNum() - 1].lock();
+						pumps.get(car.getPumpNum() - 1).getIsEligibleToFuelUp().await();//pumps[car.getPumpNum() - 1].getIsEligibleToFuelUp().await();
+						pumps.get(car.getPumpNum() - 1).unlock();//pumps[car.getPumpNum() - 1].unlock();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -132,7 +137,7 @@ public class GasStation extends Observable {
 		trans.timeStamp = LocalDateTime.now();
 		trans.type = ServiceType.FUEL;
 
-		pumps[car.getPumpNum()-1].pumpFuelUp(car, mfpool);
+		pumps.get(car.getPumpNum() - 1).pumpFuelUp(car, mfpool);//pumps[car.getPumpNum()-1].pumpFuelUp(car, mfpool);
 
 		statistics.setNumOfCarsFueledUp(statistics.getNumOfCarsFueledUp() + 1);
 		statistics.setFuelProfit(statistics.getFuelProfit() + pricePerLiter * car.getNumOfLiters());
@@ -237,11 +242,11 @@ public class GasStation extends Observable {
 		this.gasStationClosing = gasStationClosing;
 	}
 
-	public Pump[] getPumps() {
+	public ArrayList<Pump> getPumps() {
 		return pumps;
 	}
 
-	public void setPumps(Pump[] pumps) {
+	public void setPumps(ArrayList<Pump> pumps) {
 		this.pumps = pumps;
 	}
 
@@ -279,6 +284,8 @@ public class GasStation extends Observable {
 
 	public void setMfpool(MainFuelPool mfpool) {
 		this.mfpool = mfpool;
+		GasStationUI.currentFuelState(mfpool.getCurrentCapacity(), this);
+		//fireTheMainFuelPoolCapacity();
 	}
 
 	public int getNumOfCarsInTheGasStationCurrently() {
@@ -390,5 +397,21 @@ public class GasStation extends Observable {
 		entity.setCarsFueled(this.statistics.getNumOfCarsFueledUp());
 		entity.setCarsCleaned(this.statistics.getNumOfCarsCleaned());
 		return entity;
+	}
+
+	public void setNumOfPumps(int numOfPumps) {
+		this.numOfPumps = numOfPumps;
+	}
+
+	public void addPump(Pump pump) {
+		if(pumps == null) {
+			pumps = new ArrayList<>(pump.getNum());
+		}
+		if (pumps.size() > pump.getNum()) {
+			pumps.set(pump.getNum(), pump);
+		} else {
+			pumps.add(pump.getNum(), pump);
+		}
+		pump.setStation(this);
 	}
 }  // GasStation

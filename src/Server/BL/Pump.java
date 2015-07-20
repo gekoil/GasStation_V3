@@ -32,6 +32,16 @@ public class Pump extends ReentrantLock{
 	}
 
 	public Pump() {
+		try {
+			this.handler = new FileHandler("Pump_Number" + this.num + ".txt");
+			this.handler.setFormatter(new MyFormat());
+			this.handler.setFilter(new MyObjectFilter(this));
+			GasStation.getLog().addHandler(handler);
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	// this function returns true if the queue on CleanService is shorter than on the pump
@@ -107,5 +117,9 @@ public class Pump extends ReentrantLock{
 		entity.setId(this.getNum());
 		entity.setStationId(this.station.getId());
 		return entity;
+	}
+
+	public void setStation(GasStation station) {
+		this.station = station;
 	}
 }  // Pump

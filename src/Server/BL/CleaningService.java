@@ -36,6 +36,18 @@ public class CleaningService {
 	}
 
 	public CleaningService() {
+		autoClean = new AutoClean();
+
+		try {
+			this.handler = new FileHandler("Cleaning Service Log.txt");
+			this.handler.setFormatter(new MyFormat());
+			this.handler.setFilter(new MyObjectFilter(this));
+			GasStation.getLog().addHandler(handler);
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public int getNumOfTeams() {
@@ -43,6 +55,11 @@ public class CleaningService {
 	}
 	public void setNumOfTeams(int numOfTeams) {
 		this.numOfTeams = numOfTeams;
+		manualClean = new ManualClean[numOfTeams];
+		for (int i = 0; i < numOfTeams; i++) {
+			manualClean[i] = new ManualClean(i+1);
+		}
+		numOfTeamsFree = numOfTeams;
 	}
 	public int getPrice() {
 		return price;

@@ -84,7 +84,7 @@ public class CreateGsFromXML {
 			double pricePerLiter = Double.parseDouble(pricePerLiterString);
 
 			// getting the MainFuelPool Node
-			Node mainFuelPoolNode = getNode("MainFuelPool",gasStationNode.getChildNodes());
+			Node mainFuelPoolNode = getNode("MainFuelPool", gasStationNode.getChildNodes());
 			String maxCapacityString = getNodeAttr("maxCapacity", mainFuelPoolNode);
 			int maxCapacity = Integer.parseInt(maxCapacityString);
 			String currentCapacityString = getNodeAttr("currentCapacity",
@@ -92,7 +92,7 @@ public class CreateGsFromXML {
 			int currentCapacity = Integer.parseInt(currentCapacityString);
 
 			// getting the CleaningService Node
-			Node cleaningServiceNode = getNode("CleaningService",gasStationNode.getChildNodes());
+			Node cleaningServiceNode = getNode("CleaningService", gasStationNode.getChildNodes());
 			String numOfTeamsString = getNodeAttr("numOfTeams", cleaningServiceNode);
 			int numOfTeams = Integer.parseInt(numOfTeamsString);
 			String priceString = getNodeAttr("price", cleaningServiceNode);
@@ -102,11 +102,30 @@ public class CreateGsFromXML {
 			int secondsPerAutoClean = Integer.parseInt(secondsPerAutoCleanString);
 
 			// TODO: add call to context and get bean
-			MainFuelPool pool = new MainFuelPool(maxCapacity, currentCapacity);
+			MainFuelPool pool = (MainFuelPool) context.getBean("mainFuelPool");
+			pool.setCurrentCapacity(currentCapacity);
+			pool.setMaxCapacity(maxCapacity);
+			//MainFuelPool pool = new MainFuelPool(maxCapacity, currentCapacity);
+
 			// TODO: add call to context and get bean
-			CleaningService cs = new CleaningService(numOfTeams ,price, secondsPerAutoClean);
+			CleaningService cs = (CleaningService)context.getBean("cleaning");
+			cs.setNumOfTeams(numOfTeams);
+			cs.setPrice(price);
+			cs.setSecondsPerAutoClean(secondsPerAutoClean);
+			//CleaningService cs = new CleaningService(numOfTeams ,price, secondsPerAutoClean);
+
 			// TODO: add call to context and get bean
-			GasStation gs = new GasStation(numOfPumps, pricePerLiter, pool, cs);
+			GasStation gs = (GasStation)context.getBean("gasStation");
+			gs.setPricePerLiter(pricePerLiter);
+			gs.setNumOfPumps(numOfPumps);
+			gs.setMfpool(pool);
+			gs.setCs(cs);
+			for (int i = 0; i < numOfPumps; i++) {
+				Pump pump = (Pump)context.getBean("pump");
+				pump.setNum(i);
+				gs.addPump(pump);
+			}
+			//GasStation gs = new GasStation(numOfPumps, pricePerLiter, pool, cs, context);
 			return gs;
 		}  // getGasStationXML
 		

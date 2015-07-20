@@ -1,9 +1,9 @@
 package BL;
 
+import UI.GasStationUI;
+
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-
-import UI.GasStationUI;
 
 public class MainFuelPool extends ReentrantLock {
 	private static final long serialVersionUID = 1L;
@@ -56,10 +56,10 @@ public class MainFuelPool extends ReentrantLock {
 		gs.setFillingMainFuelPool(false);
 		gs.finishedFillTheMainFuel();
 		// notify all the threads, that are waiting to fuel up
-		for (int i = 0; i < gs.getPumps().length; i++) {
-			gs.getPumps()[i].lock();
-			gs.getPumps()[i].getIsEligibleToFuelUp().signalAll();
-			gs.getPumps()[i].unlock();
+		for (int i = 0; i < gs.getPumps().size(); i++) {
+			gs.getPumps().get(i).lock();//[i].lock();
+			gs.getPumps().get(i).getIsEligibleToFuelUp().signalAll();//[i].getIsEligibleToFuelUp().signalAll();
+			gs.getPumps().get(i).unlock();//[i].unlock();
 		}
 		GasStationUI.finishedFillingUpTheMainFuelPool(gs);
 		GasStationUI.currentFuelState(getCurrentCapacity(), gs);

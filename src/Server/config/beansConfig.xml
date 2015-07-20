@@ -11,6 +11,6 @@
     <bean id="manualClean" class="BL.ManualClean" scope="prototype"/>
     <bean id="pump" class="BL.Pump" scope="prototype"/>
     <bean id="statistics" class="BL.Statistics" scope="prototype"/>
-    <bean id="iDAL" class="DAL.ConnectorDAL"/>
-    <!--<bean id="iDAL" class="DAL.PersistenceDAL"/>-->
+    <!--<bean id="iDAL" class="DAL.ConnectorDAL"/>-->
+    <bean id="iDAL" class="DAL.PersistenceDAL" />
 </beans>

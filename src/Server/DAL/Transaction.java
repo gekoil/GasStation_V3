@@ -35,7 +35,12 @@ public class Transaction implements Serializable {
         TransactionsEntity entity = new TransactionsEntity();
         entity.setStationId(gasStationId);
         entity.setCarId(carId);
-        entity.setPump(pump);
+        if (pump >= 0) {
+            entity.setPump(pump);
+        } else {
+            entity.setPump(0);
+        }
+
         entity.setAmount(amount);
         Date out = Date.valueOf(timeStamp.toLocalDate());
         entity.setDateAdded(out);

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Vector;
 
 public class ConnectorDAL implements IDAL {
@@ -95,16 +96,16 @@ public class ConnectorDAL implements IDAL {
 	}
 
 	@Override
-	public boolean setPumps(Pump[] pumps, GasStation gs) {
+	public boolean setPumps(ArrayList<Pump> pumps, GasStation gs) {
 		Connection connection;
 		try {
 			connection = dataSource.getConnection();
 			Statement statement = connection.createStatement();
 			int rows = 0;
-			for (int i = 0; i < pumps.length; i++)
+			for (int i = 0; i < pumps.size(); i++)
 				rows += statement.executeUpdate(String.format(
 						"INSERT INTO pumps (ID, STATION_ID) VALUES (%d, %d)",
-						pumps[i].getNum(), gs.getId()));
+						pumps.get(i).getNum(), gs.getId()));
 			statement.close();
 			connection.close();
 		} catch (SQLException e) {
@@ -199,17 +200,18 @@ public class ConnectorDAL implements IDAL {
 	
 	@Override
 	public String getCarFee(int id) {
-		String sumFee = "";
+		String sumFee = "Car No." + id;
 		try {
 			Connection connection = dataSource.getConnection();
 			Statement statement = connection.createStatement();
 			//SELECT DATE_ADDED, TIME_ADDED, PUMP, SERVICE_TYPE, SUM(AMOUNT) AS 'SUM' FROM transactions "
 			Vector<Transaction> trans = new Vector<Transaction>();
-			ResultSet res = statement.executeQuery("SELECT SUM(AMOUNT) AS 'FEE' FROM transactions WHERE CAR_ID = " + id);
-			if(res.getRow() != 0)
-				sumFee += res.getDouble("FEE");
+			ResultSet res = statement.executeQuery("SELECT SUM(AMOUNT) AS 'FEE', COUNT(CAR_ID) AS 'SIZE' FROM my_db.transactions WHERE CAR_ID=" + id);
+			res.next();
+			if(res.getInt("SIZE") != 0)
+				sumFee += " has paid " + res.getDouble("FEE") + " in total";
 			else
-				sumFee = "Car No." + id + " is not exist.";
+				sumFee += " does not exist.";
 			res.close();
 			statement.close();
 			connection.close();

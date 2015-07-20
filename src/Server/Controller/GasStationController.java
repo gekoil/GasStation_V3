@@ -89,7 +89,7 @@ public class GasStationController implements MainFuelEventListener,
 							try {
 								ClientsSocketInfo clientData = new ClientsSocketInfo(client);
 								clients.put(addClient(), clientData);
-								clientData.getOutputStream().writeObject((Integer)gs.getPumps().length);
+								clientData.getOutputStream().writeObject((Integer)gs.getPumps().size());//.length);
 								Object carInput;
 								do {
 									carInput = clientData.getInputStream().readObject();

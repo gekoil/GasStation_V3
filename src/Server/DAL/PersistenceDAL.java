@@ -16,7 +16,9 @@ import org.hibernate.service.ServiceRegistryBuilder;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 @SuppressWarnings("SpellCheckingInspection")
@@ -27,6 +29,7 @@ public class PersistenceDAL implements IDAL {
     private SessionFactory factory;
 
     private PersistenceDAL() {
+
         Configuration configuration = new Configuration().configure();
         ServiceRegistryBuilder builder = new ServiceRegistryBuilder().applySettings(configuration.getProperties());
         factory = configuration.buildSessionFactory(builder.buildServiceRegistry());
@@ -65,7 +68,7 @@ public class PersistenceDAL implements IDAL {
     }
 
     @Override
-    public boolean setPumps(Pump[] pumps, GasStation gs) {
+    public boolean setPumps(ArrayList<Pump> pumps, GasStation gs) {
         Session session = factory.openSession();
         org.hibernate.Transaction transaction1 = session.beginTransaction();
         for (Pump pump : pumps) {
@@ -82,7 +85,7 @@ public class PersistenceDAL implements IDAL {
         TransactionsEntity entity = transaction.toEntity();
         Session session = factory.openSession();
         org.hibernate.Transaction transaction1 = session.beginTransaction();
-        session.saveOrUpdate(entity);
+        session.save(entity);
         transaction1.commit();
         session.close();
         return true;
@@ -91,9 +94,7 @@ public class PersistenceDAL implements IDAL {
     @Override
     public Vector<Transaction> getTransactions(LocalDateTime first, LocalDateTime last, int option) {
         Session session = factory.openSession();
-        //String queryString = setQuery(session, first, last, option);//"FROM TransactionsEntity";
-
-        Query query = setQuery(session, first, last, option);// session.createQuery(queryString);
+        Query query = setQuery(session, first, last, option);
         Vector<Transaction> vector = new Vector<>();
         Iterator it = query.iterate();
         while (it.hasNext()) {
@@ -106,33 +107,25 @@ public class PersistenceDAL implements IDAL {
 
     private Query setQuery(Session session, LocalDateTime first, LocalDateTime last, int option) {
         StringBuilder select = new StringBuilder().append("from TransactionsEntity");
-        Query query = null;
+        Query query;
         switch (option) {
             case 1:
                 select.append(" where timeAdded between :firstTime and :secondTime ")
-                        .append("and dateAdded between :firstDate and :secondDate group by pump");//.toString();
+                        .append("and dateAdded between :firstDate and :secondDate group by pump");
                 query = session.createQuery(select.toString()).setTime("firstTime", Time.valueOf(first.toLocalTime()))
                        .setTime("secondTime", Time.valueOf(last.toLocalTime()))
                        .setDate("firstDate", Date.valueOf(first.toLocalDate()))
                        .setDate("secondDate", Date.valueOf(last.toLocalDate()));
-                //select += "WHERE TIME_ADDED BETWEEN " + timeFormat.format(first)
-                //        + " AND " + timeFormat.format(last) + " AND DATE_ADDED BETWEEN "
-                //        + dateFormat.format(first) + " AND "
-                //        + dateFormat.format(last) + " GROUP BY PUMP";
                 break;
             case 2:
                 select.append(" where dateAdded between :firstDate and :secondDate group by pump");
                 query = session.createQuery(select.toString()).setDate("firstDate", Date.valueOf(first.toLocalDate()))
                         .setDate("secondDate", Date.valueOf(last.toLocalDate()));
-                //select += "WHERE DATE_ADDED BETWEEN " + dateFormat.format(first)
-                //        + " AND " + dateFormat.format(last) + " GROUP BY PUMP";
                 break;
             case 3:
                 select.append(" where dateAdded between :firstDate and :secondDate group by dateAdded");
                 query = session.createQuery(select.toString()).setDate("firstDate", Date.valueOf(first.toLocalDate()))
                         .setDate("secondDate", Date.valueOf(last.toLocalDate()));
-                //select += "WHERE DATE_ADDED BETWEEN " + dateFormat.format(first)
-                //        + " AND " + dateFormat.format(last) + " GROUP BY DATE_ADDED";
                 break;
             default:
                 query = session.createQuery(select.toString());
@@ -143,6 +136,20 @@ public class PersistenceDAL implements IDAL {
 
 	@Override
 	public String getCarFee(int id) {
-		return "";
+        String sumFee = "Car No." + id;
+        Session session = factory.openSession();
+        //SELECT DATE_ADDED, TIME_ADDED, PUMP, SERVICE_TYPE, SUM(AMOUNT) AS 'SUM' FROM transactions "
+        Vector<Transaction> vector = new Vector<Transaction>();
+        Query query = session.createQuery("select sum(tr.amount), count(tr.carId) from TransactionsEntity tr where tr.carId=" + id);
+        List<Object[]> listResult = query.list();
+        Number sum = (Number) listResult.get(0)[0];
+        Number resultsCounted = (Number) listResult.get(0)[1];
+        if(resultsCounted.intValue() > 0) {
+            sumFee += " has paid " + sum + " in total";
+        } else {
+            sumFee += " does not exist.";
+        }
+        session.close();
+        return sumFee;
 	}
 }
