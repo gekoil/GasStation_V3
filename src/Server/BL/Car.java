@@ -1,5 +1,6 @@
 package BL;
 
+import Annotations.Loggable;
 import DAL.Entities.CarsEntity;
 import UI.GasStationUI;
 import Annotations.DuringWash;
@@ -112,6 +113,7 @@ public class Car implements Runnable {
 		return fueledUp;
 	}
 
+	@Loggable(logMessage = "Car fueled up")
 	public void setFueledUp(boolean fueledUp) {
 		this.fueledUp = fueledUp;
 	}
