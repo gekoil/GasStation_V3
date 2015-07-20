@@ -12,6 +12,7 @@ public class CleaningService {
 	private AutoClean autoClean;
 	private ManualClean[] manualClean;
 	private int numOfTeamsFree;
+	private FileHandler handler;
 	
 	public CleaningService(int numOfTeams, int price, int secondsPerAutoClean) {
 		this.numOfTeams = numOfTeams;
@@ -23,6 +24,17 @@ public class CleaningService {
 			manualClean[i] = new ManualClean(i+1);
 		}
 		numOfTeamsFree = numOfTeams;
+		
+		try {
+			this.handler = new FileHandler("Cleaning Service Log.txt");
+			this.handler.setFormatter(new MyFormat());
+			this.handler.setFilter(new MyObjectFilter(this));
+			GasStation.getLog().addHandler(handler);		
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public CleaningService() {

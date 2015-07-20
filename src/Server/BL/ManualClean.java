@@ -10,9 +10,21 @@ import java.util.logging.FileHandler;
 public class ManualClean extends ReentrantLock {
 	private static final long serialVersionUID = 1L;
 	private int teamNum;
+	private FileHandler handler;
 
 	public ManualClean(int num) {
 		this.teamNum = num;
+		
+		try {	
+			this.handler = new FileHandler("ManualClean"+this.teamNum+".txt");
+			this.handler.setFormatter(new MyFormat());
+			this.handler.setFilter(new MyObjectFilter(this));
+			GasStation.getLog().addHandler(handler);
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
 	}
 
 	public ManualClean() {

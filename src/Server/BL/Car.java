@@ -18,6 +18,7 @@ public class Car implements Runnable {
 	private GasStation gs;
 	private boolean fueledUp;
 	private boolean cleanedUp;
+	private FileHandler handler;
 	private ClientsSocketInfo owner;
 	
 	public Car(int id, boolean wantCleaning, int numOfLiters, int pumpNum, GasStation gs) {
@@ -29,6 +30,15 @@ public class Car implements Runnable {
 		this.setGasStation(gs);
 		fueledUp = false;
 		cleanedUp = false;
+		
+		try {
+			this.handler = new FileHandler("Car_ID"+this.id+" Log.txt");
+			this.handler.setFormatter(new MyFormat());
+			this.handler.setFilter(new MyObjectFilter(this));
+			GasStation.getLog().addHandler(this.handler);
+		} catch (SecurityException | IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public Car() {

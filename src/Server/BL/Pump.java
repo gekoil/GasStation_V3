@@ -13,12 +13,23 @@ public class Pump extends ReentrantLock{
 	private static final long serialVersionUID = 1L;
 	private int num;
 	private GasStation station;
+	private FileHandler handler;
 	private Condition isEligibleToFuelUp = this.newCondition();
 	
 	
 	public Pump(int num, GasStation gasStation) {
 		this.num = num;
 		this.setStation(gasStation);
+		try {
+			this.handler = new FileHandler("Pump_Number" + this.num + ".txt");
+			this.handler.setFormatter(new MyFormat());
+			this.handler.setFilter(new MyObjectFilter(this));
+			GasStation.getLog().addHandler(handler);
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public Pump() {

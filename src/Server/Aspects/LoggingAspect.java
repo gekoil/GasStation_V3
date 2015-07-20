@@ -38,5 +38,4 @@ public class LoggingAspect {
         logger.logp(Level.INFO, className, methodName, annotationMessage, point.getArgs());
         return result;
     }
-//GasStation.getLog().log(Level.INFO, "Car #" + car.getID() + " finished fueling up, at Pump #" + pumpNum, param);
 }
