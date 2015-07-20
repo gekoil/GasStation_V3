@@ -20,8 +20,8 @@
     <aop:aspectj-autoproxy>
         <aop:include name="aspectLogger"/>
     </aop:aspectj-autoproxy>
-    <aop:config>
-        <aop:pointcut id="loggingPointcut" expression="@annotation(Loggable)"/>
+    <aop:config proxy-target-class="true">
+        <aop:pointcut id="loggingPointcut" expression="@annotation(Annotations.Loggable)"/>
         <aop:aspect id="loggingAspect" ref="aspectLogger">
             <aop:around pointcut-ref="loggingPointcut" method="logAfter"/>
         </aop:aspect>

@@ -10,9 +10,6 @@ import java.lang.annotation.Annotation;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Created by Jack on 21/07/2015.
- */
 @Aspect
 public class LoggingAspect {
 
@@ -32,7 +29,7 @@ public class LoggingAspect {
                  annotationMessage = ((Loggable) a).logMessage();
             }
         }
-        String className = point.getClass().getName();
+        String className = point.getTarget().getClass().getCanonicalName();//point.getThis().getClass().getName();
         String methodName = MethodSignature.class.cast(point.getSignature()).getMethod().getName();
         Logger logger = Logger.getLogger(GasStation.LOGGER_NAME);
         logger.logp(Level.INFO, className, methodName, annotationMessage, point.getArgs());
