@@ -212,7 +212,6 @@ public class GasStationController implements MainFuelEventListener,
 		car.setPumpNum(pump);
 		car.setWantCleaning(wash);
 		car.setGasStation(gs);
-		car.initLogger();
 		//Car c = new Car(carId_generator++, wash, liters, pump, gs);
 		dbConnector.addCar(car);
 		if(owner != null) {

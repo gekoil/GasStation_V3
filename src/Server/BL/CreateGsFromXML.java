@@ -162,7 +162,6 @@ public class CreateGsFromXML {
 						car.setNumOfLiters(numOfLiters);
 						car.setPumpNum(pumpNum);
 						car.setGasStation(gs);
-						car.initLogger();
 						cars[i] = car;//new Car(id, wantCleaning, numOfLiters, pumpNum, gs);
 					} else {
 						// TODO: add call to context and get bean
@@ -172,7 +171,6 @@ public class CreateGsFromXML {
 						car.setNumOfLiters(0);
 						car.setPumpNum(-1);
 						car.setGasStation(gs);
-						car.initLogger();
 						cars[i] = car;//new Car(id, wantCleaning, 0, -1, gs);
 					}
 				}  // for-loop

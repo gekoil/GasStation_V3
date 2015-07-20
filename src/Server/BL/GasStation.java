@@ -1,12 +1,13 @@
 package BL;
 
+import Annotations.Loggable;
 import DAL.Entities.GasStationsEntity;
 import DAL.ServiceType;
 import DAL.Transaction;
 import Listeners.CarsEventListener;
 import Listeners.MainFuelEventListener;
 import Listeners.StatisticEventListener;
-import UI.GasStationUI;
+
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -79,23 +80,14 @@ public class GasStation extends Observable {
 		}
 		this.mfpool = mfpool;
 		this.cs = cs;
-		try {
-			this.handler = new FileHandler("Gas Station Log.txt");
-			this.handler.setFormatter(new MyFormat());
-			this.handler.setFilter(new MyObjectFilter(this));
-			GasStation.getLog().addHandler(this.handler);
-			GasStation.getLog().setUseParentHandlers(false);
-		} catch (SecurityException | IOException e) {
-			e.printStackTrace();
-		}
 		// the GasSupplier is the observer which fills the MainPool up on less than 20% event
 		this.addObserver(supplier);
 		numOfCarsFuelingUpCurrently = 0;
 		numOfCarsInTheGasStationCurrently = 0;
-		GasStationUI.currentFuelState(mfpool.getCurrentCapacity(), this);
 		fireTheMainFuelPoolCapacity();
 	}
 
+	@Loggable(logMessage = "Car enter the station")
 	public void enterGasStation(Car car) {
 		gasStationQueue.execute(car);
 		numOfCarsInTheGasStationCurrently++;
@@ -109,7 +101,6 @@ public class GasStation extends Observable {
 			if (queueOnCleanServiceIsShorter)
 				return;
 			if (mfpool.getCurrentCapacity() <= 0 || car.getNumOfLiters() > mfpool.getCurrentCapacity()) {
-				GasStationUI.emptyFuelPool(car, this);
 				// if the GasStation has less fuel than the car needs, fire the filling event!
 				if (!isFillingMainFuelPool()) {
 					fireFillUPMainFuelPoolEvent();
@@ -150,11 +141,12 @@ public class GasStation extends Observable {
 		}
 	}  // fuelUp
 
+	@Loggable(logMessage = "filling the main fuel pool")
 	public void fireFillUPMainFuelPoolEvent() {
 		super.setChanged();
 		super.notifyObservers(this);
 	}  // fireFillUPMainFuelPoolEvent
-
+	
 	public void cleanCar(Car car) {
 		// continueToManualClean can be false in case, when the GasStation is closing and
 		// the car didn't pass the AutoClean! So the car shouldn't pass CleanService at all,
@@ -200,17 +192,16 @@ public class GasStation extends Observable {
 	public void closeGasStation() {
 		// can't close the gas station while filling up the main fuel pool
 		if (isFillingMainFuelPool) {
-			GasStationUI.cantCloseWhileFillingMainPool(this, statisticsListeners);
+			fireStatistics("can't close the gas station while filling up the main fuel pool");
 			return;
 		}
 		gasStationClosing = true;
 		// wait until all threads in the queue run until the end(only in case of fuelingUp)
 		gasStationQueue.shutdown();
-		GasStationUI.closeGasStation(this);
 		if (numOfCarsInTheGasStationCurrently > 0)
-			GasStationUI.statWillBeShown(this, statisticsListeners);
+			fireStatistics("The statistics will be shown after the last car leaves the gas station");
 		else {
-			GasStationUI.showStatistics(this, this);
+			fireStatistics(statistics.toString());
 		}
 	}  // closeGasStation
 
@@ -281,11 +272,11 @@ public class GasStation extends Observable {
 	public MainFuelPool getMfpool() {
 		return mfpool;
 	}
-
+	
+	
 	public void setMfpool(MainFuelPool mfpool) {
 		this.mfpool = mfpool;
-		GasStationUI.currentFuelState(mfpool.getCurrentCapacity(), this);
-		//fireTheMainFuelPoolCapacity();
+		fireTheMainFuelPoolCapacity();
 	}
 
 	public int getNumOfCarsInTheGasStationCurrently() {
@@ -352,17 +343,20 @@ public class GasStation extends Observable {
 		for(MainFuelEventListener l : fuelListeners)
 			l.theMainFuelIsLow(mfpool.getCurrentCapacity());
 	}
-
+	
+	@Loggable(logMessage = "The fuel pool get filled")
 	protected void finishedFillTheMainFuel() {
 		for(MainFuelEventListener l : fuelListeners)
 			l.finishedFillTheMainFuel(mfpool.getCurrentCapacity());
 	}
-
+	
+	@Loggable(logMessage = "Car get washed")
 	protected void fireFillingTheMainFuel() {
 		for(MainFuelEventListener l : fuelListeners)
 			l.fireFillingTheMainFuel();
 	}
-
+	
+	@Loggable(logMessage = "Main fuel pool is full")
 	protected void fireTheMainFuelIsFull() {
 		for(MainFuelEventListener l : fuelListeners)
 			l.fireTheMainFuelIsFull();
@@ -377,15 +371,22 @@ public class GasStation extends Observable {
 		for(StatisticEventListener l : statisticsListeners)
 			l.ShowStatistics(statistics.toString());
 	}
-
+	
+	@Loggable(logMessage = "Car get cleand")
 	protected void fireCarWashedEvent(Car car, Transaction t) {
 		for(CarsEventListener l : carsEventListeners)
 			l.getWashed(car, t);
 	}
-
+	
+	@Loggable(logMessage = "Car get fueld")
 	protected void fireCarFueledEvent(Car car, Transaction t) {
 		for(CarsEventListener l : carsEventListeners)
 			l.getFueled(car, t);
+	}
+	
+	protected void fireStatistics(String stat) {
+		for(StatisticEventListener l : statisticsListeners)
+			l.ShowStatistics(stat);
 	}
 
 	public GasStationsEntity toEntity() {
@@ -402,7 +403,8 @@ public class GasStation extends Observable {
 	public void setNumOfPumps(int numOfPumps) {
 		this.numOfPumps = numOfPumps;
 	}
-
+	
+	@Loggable(logMessage = "Pump added")
 	public void addPump(Pump pump) {
 		if(pumps == null) {
 			pumps = new ArrayList<>(pump.getNum());

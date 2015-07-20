@@ -2,7 +2,6 @@ package BL;
 
 import Annotations.Loggable;
 import DAL.Entities.CarsEntity;
-import UI.GasStationUI;
 import Annotations.DuringWash;
 
 import java.io.IOException;
@@ -13,36 +12,29 @@ import java.util.logging.FileHandler;
 public class Car implements Runnable {
 	private int id;
 	private boolean wantCleaning;
+	private boolean autoCleaning;
 	private int numOfLiters;
 	private int pumpNum;
 	private GasStation gs;
 	private boolean fueledUp;
 	private boolean cleanedUp;
-	private FileHandler handler;
 	private ClientsSocketInfo owner;
-
+	
 	public Car(int id, boolean wantCleaning, int numOfLiters, int pumpNum, GasStation gs) {
 		this.id = id;
 		this.wantCleaning = wantCleaning;
+		this.autoCleaning = false;
 		this.numOfLiters = numOfLiters;
 		this.pumpNum = pumpNum;
-		this.gs = gs;
+		this.setGasStation(gs);
 		fueledUp = false;
 		cleanedUp = false;
-
-		try {
-			this.handler = new FileHandler("Car_ID"+this.id+" Log.txt");
-			this.handler.setFormatter(new MyFormat());
-			this.handler.setFilter(new MyObjectFilter(this));
-			GasStation.getLog().addHandler(this.handler);
-		} catch (SecurityException | IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public Car() {
 	}
-
+	
+	@Loggable(logMessage = "Car left station")
 	public void run() {
 		try {
 			while ((!cleanedUp || !fueledUp) && !gs.isGasStationClosing()) {
@@ -59,11 +51,9 @@ public class Car implements Runnable {
 			while (!fueledUp && numOfLiters > 0) {
 				gs.fuelUp(this);
 			}
-			GasStationUI.carLeavingTheGasStation(this, gs);
-			GasStationUI.carLeavingTheGasStation(this, this);
 			gs.setNumOfCarsInTheGasStationCurrently(gs.getNumOfCarsInTheGasStationCurrently()-1);
 			if (gs.getNumOfCarsInTheGasStationCurrently() == 0 && gs.isGasStationClosing()) {
-				GasStationUI.showStatistics(gs, gs);
+				gs.fireStatistics(gs.getStatistics().toString());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -80,7 +70,8 @@ public class Car implements Runnable {
 	public int getID() {
 		return id;
 	}
-
+	
+	
 	public void setId(int id) {
 		this.id = id;
 	}
@@ -88,9 +79,15 @@ public class Car implements Runnable {
 	public boolean isWantCleaning() {
 		return wantCleaning;
 	}
-
+	
+	@Loggable(logMessage = "Car cleand")
 	public void setWantCleaning(boolean wantCleaning) {
 		this.wantCleaning = wantCleaning;
+	}
+	
+	@Loggable(logMessage = "Car get auto cleand")
+	public void setAutoCleaning(boolean autoCleaning) {
+		this.autoCleaning = autoCleaning;
 	}
 
 	public int getNumOfLiters() {
@@ -108,7 +105,7 @@ public class Car implements Runnable {
 	public void setPumpNum(int pumpNum) {
 		this.pumpNum = pumpNum;
 	}
-
+	
 	public boolean isFueledUp() {
 		return fueledUp;
 	}
@@ -124,17 +121,6 @@ public class Car implements Runnable {
 
 	public void setCleanedUp(boolean cleanedUp) {
 		this.cleanedUp = cleanedUp;
-	}
-
-	public void initLogger() {
-		try {
-			this.handler = new FileHandler("Car_ID"+this.id+" Log.txt");
-			this.handler.setFormatter(new MyFormat());
-			this.handler.setFilter(new MyObjectFilter(this));
-			GasStation.getLog().addHandler(this.handler);
-		} catch (SecurityException | IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	@DuringWash
@@ -166,6 +152,7 @@ public class Car implements Runnable {
 		this.owner = owner;
 	}
 
+	@Loggable(logMessage = "Car enter the gas station")
 	public void setGasStation(GasStation gs) {
 		this.gs = gs;
 	}

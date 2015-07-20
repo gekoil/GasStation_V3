@@ -1,6 +1,6 @@
 package BL;
 
-import UI.GasStationUI;
+import Annotations.Loggable;
 
 import java.io.IOException;
 import java.util.concurrent.locks.ReentrantLock;
@@ -10,20 +10,9 @@ import java.util.logging.FileHandler;
 public class ManualClean extends ReentrantLock {
 	private static final long serialVersionUID = 1L;
 	private int teamNum;
-	private FileHandler handler;
 
 	public ManualClean(int num) {
 		this.teamNum = num;
-		try {
-			this.handler = new FileHandler("ManualClean"+this.teamNum+".txt");
-			this.handler.setFormatter(new MyFormat());
-			this.handler.setFilter(new MyObjectFilter(this));
-			GasStation.getLog().addHandler(handler);
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public ManualClean() {
@@ -37,15 +26,13 @@ public class ManualClean extends ReentrantLock {
 	}
 
 	// this method performs the manual cleaning process!
+	@Loggable(logMessage = "Car get cleand")
 	public void manualClean(Car car, CleaningService cs, GasStation gs) {
 		lock();
 		// team work takes random time
 		int cleanTime = (int) (Math.random() * 10000);
 		// writing to the appropriate files (GasStation,Car,CleanService,ManualCleanService)
-		GasStationUI.manualCleaning(car, cleanTime, teamNum, gs);
-		GasStationUI.manualCleaning(car, cleanTime, teamNum, car);
-		GasStationUI.manualCleaning(car, cleanTime, teamNum, cs);
-		GasStationUI.manualCleaning(car, cleanTime, teamNum, this);
+		cs.carGetManualClean();
 		try {
 			Thread.sleep(cleanTime);
 		} catch (InterruptedException e) {

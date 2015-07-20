@@ -3,6 +3,8 @@ package BL;
 import java.io.IOException;
 import java.util.logging.FileHandler;
 
+import Annotations.Loggable;
+
 public class CleaningService {
 	private int numOfTeams;
 	private int price;
@@ -10,7 +12,6 @@ public class CleaningService {
 	private AutoClean autoClean;
 	private ManualClean[] manualClean;
 	private int numOfTeamsFree;
-	private FileHandler handler;
 	
 	public CleaningService(int numOfTeams, int price, int secondsPerAutoClean) {
 		this.numOfTeams = numOfTeams;
@@ -22,32 +23,10 @@ public class CleaningService {
 			manualClean[i] = new ManualClean(i+1);
 		}
 		numOfTeamsFree = numOfTeams;
-		
-		try {
-			this.handler = new FileHandler("Cleaning Service Log.txt");
-			this.handler.setFormatter(new MyFormat());
-			this.handler.setFilter(new MyObjectFilter(this));
-			GasStation.getLog().addHandler(handler);		
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
-
+	
 	public CleaningService() {
 		autoClean = new AutoClean();
-
-		try {
-			this.handler = new FileHandler("Cleaning Service Log.txt");
-			this.handler.setFormatter(new MyFormat());
-			this.handler.setFilter(new MyObjectFilter(this));
-			GasStation.getLog().addHandler(handler);
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public int getNumOfTeams() {
@@ -90,6 +69,14 @@ public class CleaningService {
 	}
 	public void setNumOfTeamsFree(int numOfTeamsFree) {
 		this.numOfTeamsFree = numOfTeamsFree;
+	}
+	@Loggable(logMessage = "Car get auto cleand")
+	public boolean carGetAutoClean() {
+		return true;
+	}
+	@Loggable(logMessage = "Car get manual cleand")
+	public boolean carGetManualClean() {
+		return true;
 	}
 	@Override
 	public String toString() {
