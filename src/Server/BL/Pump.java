@@ -73,6 +73,7 @@ public class Pump extends ReentrantLock{
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		car.setFueledUp(true);
 		station.setNumOfCarsFuelingUpCurrently(station.getNumOfCarsFuelingUpCurrently()-1);
 		unlock();	
 		// if the MainFuelPool is waiting to get filled up, signal it on the condition

@@ -24,12 +24,18 @@ public class Car implements Runnable {
 	public Car(int id, boolean wantCleaning, int numOfLiters, int pumpNum, GasStation gs) {
 		this.id = id;
 		this.wantCleaning = wantCleaning;
+		if(wantCleaning)
+			cleanedUp = false;
+		else
+			cleanedUp = true;
 		this.autoCleaning = false;
 		this.numOfLiters = numOfLiters;
+		if(this.numOfLiters > 0)
+			fueledUp = false;
+		else
+			fueledUp = true;
 		this.pumpNum = pumpNum;
 		this.setGasStation(gs);
-		fueledUp = false;
-		cleanedUp = false;
 		
 		try {
 			this.handler = new FileHandler("Car_ID"+this.id+" Log.txt");
@@ -48,19 +54,14 @@ public class Car implements Runnable {
 	public void run() {
 		try {
 			while ((!cleanedUp || !fueledUp) && !gs.isGasStationClosing()) {
-				if (!fueledUp && numOfLiters > 0)
+				if (!fueledUp)
 					gs.fuelUp(this);
-				if (!cleanedUp && wantCleaning)
+				if (!cleanedUp)
 					gs.cleanCar(this);
-				if(!wantCleaning && (fueledUp || numOfLiters == 0))
-					break;
-				if(numOfLiters == 0 && cleanedUp)
-					break;
 			}
 			// if the gas station is closing and haven't fueled up yet, go to fuel up!!!
-			while (!fueledUp && numOfLiters > 0) {
+			if(!fueledUp)
 				gs.fuelUp(this);
-			}
 			gs.setNumOfCarsInTheGasStationCurrently(gs.getNumOfCarsInTheGasStationCurrently()-1);
 			if (gs.getNumOfCarsInTheGasStationCurrently() == 0 && gs.isGasStationClosing()) {
 				gs.fireStatistics(gs.getStatistics().toString());
@@ -72,7 +73,7 @@ public class Car implements Runnable {
 
 	public ClientCar toClientCar() {
 		boolean needWash = false;
-		if (!cleanedUp && wantCleaning)
+		if (!cleanedUp)
 			needWash = true;
 		return new ClientCar(id, numOfLiters, needWash, pumpNum);
 	}
