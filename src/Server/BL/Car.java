@@ -165,6 +165,17 @@ public class Car implements Runnable {
 		return gs;
 	}
 
+	private void initLogger() {
+		try {
+			this.handler = new FileHandler("Car_ID"+this.id+" Log.txt");
+			this.handler.setFormatter(new MyFormat());
+			this.handler.setFilter(new MyObjectFilter(this));
+			GasStation.getLog().addHandler(this.handler);
+		} catch (SecurityException | IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public CarsEntity toEntity() {
 		CarsEntity entity = new CarsEntity();
 		entity.setId(this.getID());
