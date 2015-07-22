@@ -30,7 +30,14 @@ public class Car implements Runnable {
 		this.setGasStation(gs);
 		fueledUp = false;
 		cleanedUp = false;
-		
+
+		initLogger();
+	}
+
+	public Car() {
+	}
+
+	private void initLogger() {
 		try {
 			this.handler = new FileHandler("Car_ID"+this.id+" Log.txt");
 			this.handler.setFormatter(new MyFormat());
@@ -39,9 +46,6 @@ public class Car implements Runnable {
 		} catch (SecurityException | IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public Car() {
 	}
 	
 	@Loggable(logMessage = "Car left station")
@@ -84,6 +88,7 @@ public class Car implements Runnable {
 	
 	public void setId(int id) {
 		this.id = id;
+		initLogger();
 	}
 
 	public boolean isWantCleaning() {

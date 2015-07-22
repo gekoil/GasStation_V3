@@ -24,21 +24,13 @@ public class CleaningService {
 			manualClean[i] = new ManualClean(i+1);
 		}
 		numOfTeamsFree = numOfTeams;
-		
-		try {
-			this.handler = new FileHandler("Cleaning Service Log.txt");
-			this.handler.setFormatter(new MyFormat());
-			this.handler.setFilter(new MyObjectFilter(this));
-			GasStation.getLog().addHandler(handler);		
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
+		initLogger();
 	}
-	
+
 	public CleaningService() {
 		autoClean = new AutoClean();
+		initLogger();
 	}
 
 	public int getNumOfTeams() {
@@ -95,4 +87,18 @@ public class CleaningService {
 		return "CleaningService [numOfTeams=" + numOfTeams + ", price=" + price
 				+ ", secondsPerAutoClean=" + secondsPerAutoClean + "]";
 	}
+
+	private void initLogger() {
+		try {
+			this.handler = new FileHandler("Cleaning Service Log.txt");
+			this.handler.setFormatter(new MyFormat());
+			this.handler.setFilter(new MyObjectFilter(this));
+			GasStation.getLog().addHandler(handler);
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

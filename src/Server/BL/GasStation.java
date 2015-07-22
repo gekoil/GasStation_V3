@@ -52,15 +52,7 @@ public class GasStation extends Observable {
 		this.fuelListeners = new Vector<>();
 		this.statisticsListeners = new Vector<>();
 		this.carsEventListeners = new Vector<>();
-		try {
-			this.handler = new FileHandler("Gas Station Log.txt");
-			this.handler.setFormatter(new MyFormat());
-			this.handler.setFilter(new MyObjectFilter(this));
-			GasStation.getLog().addHandler(this.handler);
-			GasStation.getLog().setUseParentHandlers(false);
-		} catch (SecurityException | IOException e) {
-			e.printStackTrace();
-		}
+		initLogger();
 		// the GasSupplier is the observer which fills the MainPool up on less than 20% event
 		this.addObserver(supplier);
 		numOfCarsFuelingUpCurrently = 0;
@@ -81,6 +73,7 @@ public class GasStation extends Observable {
 		}
 		this.mfpool = mfpool;
 		this.cs = cs;
+		initLogger();
 		// the GasSupplier is the observer which fills the MainPool up on less than 20% event
 		this.addObserver(supplier);
 		numOfCarsFuelingUpCurrently = 0;
@@ -416,5 +409,17 @@ public class GasStation extends Observable {
 			pumps.add(pump.getNum(), pump);
 		}
 		pump.setStation(this);
+	}
+
+	private void initLogger() {
+		try {
+			this.handler = new FileHandler("Gas Station Log.txt");
+			this.handler.setFormatter(new MyFormat());
+			this.handler.setFilter(new MyObjectFilter(this));
+			GasStation.getLog().addHandler(this.handler);
+			GasStation.getLog().setUseParentHandlers(false);
+		} catch (SecurityException | IOException e) {
+			e.printStackTrace();
+		}
 	}
 }  // GasStation

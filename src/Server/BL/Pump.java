@@ -20,16 +20,7 @@ public class Pump extends ReentrantLock{
 	public Pump(int num, GasStation gasStation) {
 		this.num = num;
 		this.setStation(gasStation);
-		try {
-			this.handler = new FileHandler("Pump_Number" + this.num + ".txt");
-			this.handler.setFormatter(new MyFormat());
-			this.handler.setFilter(new MyObjectFilter(this));
-			GasStation.getLog().addHandler(handler);
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		initLogger();
 	}
 
 	public Pump() {
@@ -73,6 +64,7 @@ public class Pump extends ReentrantLock{
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		car.setFueledUp(true);
 		station.setNumOfCarsFuelingUpCurrently(station.getNumOfCarsFuelingUpCurrently()-1);
 		unlock();	
 		// if the MainFuelPool is waiting to get filled up, signal it on the condition
@@ -90,6 +82,7 @@ public class Pump extends ReentrantLock{
 	
 	public void setNum(int num) {
 		this.num = num;
+		initLogger();
 	}
 	
 	public int getNum() {
@@ -109,6 +102,19 @@ public class Pump extends ReentrantLock{
 		entity.setId(this.getNum());
 		entity.setStationId(this.station.getId());
 		return entity;
+	}
+
+	private void initLogger() {
+		try {
+			this.handler = new FileHandler("Pump_Number" + this.num + ".txt");
+			this.handler.setFormatter(new MyFormat());
+			this.handler.setFilter(new MyObjectFilter(this));
+			GasStation.getLog().addHandler(handler);
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Loggable(logMessage = "Pump created")

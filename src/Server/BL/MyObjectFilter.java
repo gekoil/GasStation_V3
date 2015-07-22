@@ -12,8 +12,9 @@ public class MyObjectFilter implements Filter {
 	}
 	
 	public boolean isLoggable(LogRecord rec) {
-		if (rec.getParameters() != null) {
-			Object temp = rec.getParameters()[0];
+		Object[] params = rec.getParameters();
+		if (params != null && params.length > 0) {
+			Object temp = params[0];
 			return this.filter == temp;
 		}
 		else
