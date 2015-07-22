@@ -36,17 +36,6 @@ public class Car implements Runnable {
 
 	public Car() {
 	}
-
-	private void initLogger() {
-		try {
-			this.handler = new FileHandler("Car_ID"+this.id+" Log.txt");
-			this.handler.setFormatter(new MyFormat());
-			this.handler.setFilter(new MyObjectFilter(this));
-			GasStation.getLog().addHandler(this.handler);
-		} catch (SecurityException | IOException e) {
-			e.printStackTrace();
-		}
-	}
 	
 	@Loggable(logMessage = "Car left station")
 	public void run() {

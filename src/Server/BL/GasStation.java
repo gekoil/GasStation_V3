@@ -92,7 +92,7 @@ public class GasStation extends Observable {
 			// choosing the shortest waiting queue
 			//pumps[car.getPumpNum() - 1].checkWhichQueueIsShorter(cs, car);
 			boolean queueOnCleanServiceIsShorter = pumps.get(car.getPumpNum() - 1).checkWhichQueueIsShorter(cs, car);
-			if (queueOnCleanServiceIsShorter)
+			if (queueOnCleanServiceIsShorter && !gasStationClosing)
 				return;
 			if (mfpool.getCurrentCapacity() <= 0 || car.getNumOfLiters() > mfpool.getCurrentCapacity()) {
 				// if the GasStation has less fuel than the car needs, fire the filling event!
@@ -114,6 +114,8 @@ public class GasStation extends Observable {
 			mfpool.setCurrentCapacity(mfpool.getCurrentCapacity() - car.getNumOfLiters());
 		}
 		// fueling up by the chosen pump
+		pumps.get(car.getPumpNum() - 1).pumpFuelUp(car, mfpool);//pumps[car.getPumpNum()-1].pumpFuelUp(car, mfpool);
+		
 		Transaction trans = new Transaction();
 		trans.gasStationId = getId();
 		trans.carId = car.getID();
@@ -121,9 +123,7 @@ public class GasStation extends Observable {
 		trans.amount = car.getNumOfLiters() * pricePerLiter;
 		trans.timeStamp = LocalDateTime.now();
 		trans.type = ServiceType.FUEL;
-
-		pumps.get(car.getPumpNum() - 1).pumpFuelUp(car, mfpool);//pumps[car.getPumpNum()-1].pumpFuelUp(car, mfpool);
-
+		
 		statistics.setNumOfCarsFueledUp(statistics.getNumOfCarsFueledUp() + 1);
 		statistics.setFuelProfit(statistics.getFuelProfit() + pricePerLiter * car.getNumOfLiters());
 		fireCarFueledEvent(car, trans);
