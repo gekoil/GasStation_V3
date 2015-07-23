@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.util.logging.FileHandler;
 
 import Annotations.Loggable;
+import Interfaces.LoggableClass;
 
-public class CleaningService {
+public class CleaningService implements LoggableClass {
+	private static int idCounter;
+	private int id;
 	private int numOfTeams;
 	private int price;
 	private int secondsPerAutoClean;
@@ -15,6 +18,7 @@ public class CleaningService {
 	private FileHandler handler;
 	
 	public CleaningService(int numOfTeams, int price, int secondsPerAutoClean) {
+		id = idCounter++;
 		this.numOfTeams = numOfTeams;
 		this.price = price;
 		this.secondsPerAutoClean = secondsPerAutoClean;
@@ -29,6 +33,7 @@ public class CleaningService {
 	}
 
 	public CleaningService() {
+		id = idCounter++;
 		autoClean = new AutoClean();
 		initLogger();
 	}
@@ -101,4 +106,8 @@ public class CleaningService {
 		}
 	}
 
+	@Override
+	public int getId() {
+		return 0;
+	}
 }

@@ -44,7 +44,7 @@ public class ConnectorDAL implements IDAL {
 			connection = dataSource.getConnection();
 			Statement statement = connection.createStatement();
 			statement.executeUpdate("INSERT INTO cars (ID, GS, WANT_CLEANING, NUM_OF_LITERS, PUMP_NUM) VALUES " +
-					"(" + car.getID() + ", " + car.getGasStation().getId() + ", " + car.isWantCleaning() + ", " + car.getNumOfLiters() + ", " + car.getPumpNum() + ")" +
+					"(" + car.getId() + ", " + car.getGasStation().getId() + ", " + car.isWantCleaning() + ", " + car.getNumOfLiters() + ", " + car.getPumpNum() + ")" +
 					" ON DUPLICATE KEY UPDATE WANT_CLEANING=VALUES(WANT_CLEANING)");
 			statement.close();
 			connection.close();

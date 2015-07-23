@@ -4,6 +4,7 @@ import Annotations.Loggable;
 import DAL.Entities.GasStationsEntity;
 import DAL.ServiceType;
 import DAL.Transaction;
+import Interfaces.LoggableClass;
 import Listeners.CarsEventListener;
 import Listeners.MainFuelEventListener;
 import Listeners.StatisticEventListener;
@@ -22,7 +23,7 @@ import java.util.logging.Logger;
 
 // GasStation is Observable since it fires the "less than 20%" event
 // GasSupplier listens on the event and fills the MainFuelPool on fire
-public class GasStation extends Observable {
+public class GasStation extends Observable implements LoggableClass {
 	public  static final String LOGGER_NAME = "Gas_Station Logger";
 	private static final Logger LOG = Logger.getLogger(LOGGER_NAME);
 	private static int idCounter = 0;
@@ -118,7 +119,7 @@ public class GasStation extends Observable {
 		
 		Transaction trans = new Transaction();
 		trans.gasStationId = getId();
-		trans.carId = car.getID();
+		trans.carId = car.getId();
 		trans.pump = car.getPumpNum();
 		trans.amount = car.getNumOfLiters() * pricePerLiter;
 		trans.timeStamp = LocalDateTime.now();
@@ -151,7 +152,7 @@ public class GasStation extends Observable {
 		}
 		Transaction trans = new Transaction();
 		trans.gasStationId = getId();
-		trans.carId = car.getID();
+		trans.carId = car.getId();
 		trans.amount = cs.getPrice();
 		trans.timeStamp = LocalDateTime.now();
 		trans.type = ServiceType.CLEANING;

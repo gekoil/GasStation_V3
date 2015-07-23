@@ -1,13 +1,14 @@
 package BL;
 
 import Annotations.Loggable;
+import Interfaces.LoggableClass;
 
 import java.io.IOException;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.FileHandler;
 
 // ManualClean is a lock and once it is held, it can't be held by another car simultaneously
-public class ManualClean extends ReentrantLock {
+public class ManualClean extends ReentrantLock implements LoggableClass {
 	private static final long serialVersionUID = 1L;
 	private int teamNum;
 	private FileHandler handler;
@@ -53,4 +54,9 @@ public class ManualClean extends ReentrantLock {
 			unlock();
 		}
 	}  // manualClean
+
+	@Override
+	public int getId() {
+		return teamNum;
+	}
 }

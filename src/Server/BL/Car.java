@@ -3,13 +3,14 @@ package BL;
 import Annotations.Loggable;
 import DAL.Entities.CarsEntity;
 import Annotations.DuringWash;
+import Interfaces.LoggableClass;
 
 import java.io.IOException;
 import java.util.logging.FileHandler;
 
 // Car as a thread enters the GasStation, holds the locks (Pump/AutoClean/ManualClean)
 // and performs the needed operations in the relevant classes
-public class Car implements Runnable {
+public class Car implements Runnable, LoggableClass {
 	private int id;
 	private boolean wantCleaning;
 	private boolean autoCleaning;
@@ -70,7 +71,7 @@ public class Car implements Runnable {
 		return new ClientCar(id, numOfLiters, needWash, pumpNum);
 	}
 
-	public int getID() {
+	public int getId() {
 		return id;
 	}
 	
@@ -178,7 +179,7 @@ public class Car implements Runnable {
 
 	public CarsEntity toEntity() {
 		CarsEntity entity = new CarsEntity();
-		entity.setId(this.getID());
+		entity.setId(this.getId());
 		entity.setWantCleaning(this.isWantCleaning());
 		entity.setNumOfLiters(this.getNumOfLiters());
 		entity.setPumpNum(this.getPumpNum());

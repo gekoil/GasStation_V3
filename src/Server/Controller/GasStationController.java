@@ -225,7 +225,7 @@ public class GasStationController implements MainFuelEventListener,
 
 		try {
 			gs.enterGasStation(car);
-			carView.updateConfirmMessege("You Successfully create new car.\n" + "ID: " + car.getID());
+			carView.updateConfirmMessege("You Successfully create new car.\n" + "ID: " + car.getId());
 			return car;
 		} catch (Exception e) {
 			carView.updateErrorMessege(e.getMessage());

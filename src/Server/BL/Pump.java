@@ -2,6 +2,7 @@ package BL;
 
 import Annotations.Loggable;
 import DAL.Entities.PumpsEntity;
+import Interfaces.LoggableClass;
 
 import java.io.IOException;
 import java.util.concurrent.locks.Condition;
@@ -9,7 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.FileHandler;
 
 // Pump is a lock and once it is held, it can't be held by another car simultaneously
-public class Pump extends ReentrantLock{
+public class Pump extends ReentrantLock implements LoggableClass {
 	private static final long serialVersionUID = 1L;
 	private int num;
 	private GasStation station;
@@ -120,5 +121,10 @@ public class Pump extends ReentrantLock{
 	@Loggable(logMessage = "Pump created")
 	public void setStation(GasStation station) {
 		this.station = station;
+	}
+
+	@Override
+	public int getId() {
+		return num;
 	}
 }  // Pump

@@ -73,13 +73,18 @@ public class CarRegisterUI extends JPanel implements AbstractRegisterView {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					int fuel = Integer.parseInt(fuelFld.getText());
-					boolean wash = washCbx.isSelected();
-					for(RegisterUIListener lis : listeners)
-						lis.fireNewCar(fuel, wash, pumpNo);
-					fuelFld.setText("Liters");
-					washCbx.setSelected(false);
-					pumpCmb.validate();
+					String liters = fuelFld.getText();
+					if (liters.matches("\\d+")) {
+						int fuel = Integer.parseInt(liters);
+						boolean wash = washCbx.isSelected();
+						for(RegisterUIListener lis : listeners)
+							lis.fireNewCar(fuel, wash, pumpNo);
+						fuelFld.setText("Car Sent!");
+						washCbx.setSelected(false);
+						pumpCmb.validate();
+					} else {
+						fuelFld.setText("Input Error!");
+					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
